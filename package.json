@@ -5,11 +5,12 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
+    "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://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@github.com/Clement-dl/webtech-208.git"
+    "url": "https://github.com/Clement-dl/webtech-208.git"
   },
   "keywords": [],
   "author": "",
@@ -17,5 +18,8 @@
   "bugs": {
     "url": "https://github.com/Clement-dl/webtech-208/issues"
   },
-  "homepage": "https://github.com/Clement-dl/webtech-208#readme"
+  "homepage": "https://github.com/Clement-dl/webtech-208#readme",
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
 }
