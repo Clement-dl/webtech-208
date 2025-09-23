@@ -2,10 +2,10 @@
   "name": "webtech-208",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "serveur/src/index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js",
+    "start": "node serveur/src/index.js",
+    "dev": "nodemon serveur/src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -21,5 +21,8 @@
   "homepage": "https://github.com/Clement-dl/webtech-208#readme",
   "devDependencies": {
     "nodemon": "^3.1.10"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
   }
 }
