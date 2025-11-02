@@ -6,6 +6,8 @@ export default function HomePage() {
         Bienvenue sur la page d’accueil. Utilise la barre de navigation pour
         visiter <em>About</em>, <em>Contacts</em> et <em>Articles</em>.
       </p>
+   
+
     </section>
   );
 }
