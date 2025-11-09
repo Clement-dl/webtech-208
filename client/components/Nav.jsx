@@ -1,49 +1,75 @@
 "use client";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { isAuthed, logout } from "@/lib/auth";
-import { useEffect, useState } from "react";
 
-const NavLink = ({ href, children }) => {
-  const pathname = usePathname();
-  const active = pathname === href;
-  return (
-    <Link href={href} className={`mr-4 text-sm ${active ? "underline" : "hover:underline"}`}>
-      {children}
-    </Link>
-  );
-};
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { isAuthed, logout } from "@/lib/auth";
 
 export default function Nav() {
-  const router = useRouter();
-  const [mounted, setMounted] = useState(false);
-  const [authed, setAuthed] = useState(false);
+  const pathname = usePathname();
+  const authed = isAuthed();
 
-  useEffect(() => {
-    setMounted(true);
-    setAuthed(isAuthed());
-  }, []);
+  const linkClass = (href) =>
+    `px-3 py-2 text-sm font-semibold ${
+      pathname === href
+        ? "text-white"
+        : "text-neutral-300 hover:text-white"
+    }`;
+
+  const handleLogout = () => {
+    logout();
+    // on renvoie vers la page de connexion
+    window.location.href = "/login";
+  };
 
   return (
-    <nav className="mt-2 mb-3">
-      <NavLink href="/">Home</NavLink>
-      <NavLink href="/works">Œuvres</NavLink>
-      <NavLink href="/about">About</NavLink>
-      <span className="mx-2 text-neutral-600">|</span>
+    <nav className="w-full border-b border-neutral-800 bg-black text-white">
+      <div className="max-w-5xl mx-auto flex items-center justify-between px-4 py-3">
+        {/* Logo + liens de gauche */}
+        <div className="flex items-center gap-6">
+          <Link href="/" className="text-xl font-bold">
+            Alt-Endings
+          </Link>
+          <div className="flex items-center gap-4">
+            <Link href="/" className={linkClass("/")}>
+              Alt-Endings
+            </Link>
+            <Link href="/works" className={linkClass("/works")}>
+              Œuvres
+            </Link>
+            <Link href="/about" className={linkClass("/about")}>
+              About
+            </Link>
+          </div>
+        </div>
 
-      {!mounted ? null : !authed ? (
-        <>
-          <NavLink href="/login">Connexion</NavLink>
-          <NavLink href="/signup">Inscription</NavLink>
-        </>
-      ) : (
-        <button
-          onClick={() => { logout(); router.replace("/login"); }}
-          className="text-sm hover:underline"
-        >
-          Se déconnecter
-        </button>
-      )}
+        {/* Liens de droite : login / logout / inscription */}
+        <div className="flex items-center gap-4 text-sm">
+          {authed ? (
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="px-3 py-1 rounded-md border border-white hover:bg-white hover:text-black font-semibold"
+            >
+              Se déconnecter
+            </button>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="px-3 py-1 rounded-md border border-white hover:bg-white hover:text-black font-semibold"
+              >
+                Se connecter
+              </Link>
+              <Link
+                href="/signup"
+                className="px-3 py-1 rounded-md border border-neutral-500 text-neutral-300 hover:border-white hover:text-white font-semibold"
+              >
+                Inscription
+              </Link>
+            </>
+          )}
+        </div>
+      </div>
     </nav>
   );
 }

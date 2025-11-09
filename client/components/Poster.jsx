@@ -1,18 +1,17 @@
-// components/Poster.jsx
 import Image from "next/image";
 
-export default function Poster({ workId, alt, className }) {
-  const src = `/posters/${workId}.jpg`;
+export default function Poster({ work, className = "", width = 400, height = 600 }) {
+  // On lit la colonne poster_url (BDD)
+  // Pour l’instant tu peux mettre dans la BDD des valeurs comme "/posters/w1.jpg"
+  const src = work?.poster_url || "/posters/placeholder.svg";
+
   return (
     <Image
       src={src}
-      alt={alt}
-      width={600}        
-      height={900}
-      quality={90}      
-      
-      className={`w-full h-auto ${className ?? ""}`}
-      sizes="(min-width:1024px) 300px, (min-width:640px) 45vw, 90vw"
+      alt={work?.title || "Affiche"}
+      width={width}
+      height={height}
+      className={`object-cover w-full h-auto ${className}`}
       priority={false}
     />
   );

@@ -1,56 +1,43 @@
 "use client";
-import { useState, useEffect } from "react";
+
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { loginAs, isAuthed } from "@/lib/auth";
+import { login } from "@/lib/auth";
 
 export default function SignupPage() {
-  const [name, setName] = useState("");
   const router = useRouter();
 
-  useEffect(() => {
-    if (isAuthed()) router.replace("/");
-  }, [router]);
-
-  const onSubmit = (e) => {
+  const handleSignup = (e) => {
     e.preventDefault();
-    // On simule : inscription = connexion directe
-    loginAs(name || "newfan");
-    router.replace("/");
+    // pour l’instant, on simule : inscription = login direct
+    login();
+    router.push("/works");
   };
 
   return (
-    <section className="max-w-md">
-      <h2 className="text-xl font-semibold mb-2">Inscription</h2>
-      <p className="text-sm text-neutral-400 mb-4">
-        Inscription simulée (pas de BDD pour l’instant).
-      </p>
+    <main className="min-h-screen bg-black text-white flex items-center justify-center">
+      <section className="w-full max-w-md border border-neutral-800 rounded-lg px-6 py-8 bg-neutral-900">
+        <h1 className="text-2xl font-bold text-center mb-4">
+          Inscription
+        </h1>
 
-      <form onSubmit={onSubmit} className="space-y-3">
-        <label className="block">
-          <span className="text-sm">Pseudo</span>
-          <input
-            className="mt-1 w-full bg-neutral-900 border border-neutral-700 rounded px-3 py-2"
-            placeholder="ex: cinephile"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-        </label>
-
-        <button
-          type="submit"
-          className="bg-white text-black border border-neutral-800 rounded px-4 py-2 text-sm"
-        >
-          Créer mon compte
-        </button>
-
-        <p className="text-sm text-neutral-400">
-          Déjà un compte ?{" "}
-          <Link href="/login" className="underline">
-            Se connecter
-          </Link>
+        <p className="text-sm text-neutral-300 text-center mb-6">
+          Pour cette version de démo, l’inscription est simulée.
+          Clique simplement sur le bouton ci-dessous pour entrer
+          sur le site.
         </p>
-      </form>
-    </section>
+
+        <form
+          onSubmit={handleSignup}
+          className="flex flex-col items-center gap-4"
+        >
+          <button
+            type="submit"
+            className="w-full px-4 py-2 rounded-md bg-white text-black font-semibold"
+          >
+            S&apos;inscrire
+          </button>
+        </form>
+      </section>
+    </main>
   );
 }

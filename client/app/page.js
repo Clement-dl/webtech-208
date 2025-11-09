@@ -2,33 +2,33 @@ import Link from "next/link";
 
 export default function HomePage() {
   return (
-    <section>
-      <h2 className="text-xl font-semibold mb-2">Alt-Endings</h2>
-      <p className="mb-4 text-neutral-300">
-        Réécris la fin. Vote pour la meilleure. Choisis une œuvre culte,
-        propose ta fin alternative et découvre celles des autres.
-      </p>
+    <main className="min-h-screen bg-black text-white">
+      <section className="max-w-5xl mx-auto px-4 py-10">
+        <h1 className="text-3xl font-bold mb-4">Alt-Endings</h1>
+        <p className="text-sm text-neutral-300 mb-8 max-w-xl">
+          Réécris la fin. Vote pour la meilleure. Choisis une œuvre culte,
+          propose ta fin alternative et découvre celles des autres.
+        </p>
 
-      <div className="space-x-2">
-        <Link
-          href="/works"
-          className="inline-block bg-white text-black border rounded px-4 py-2 text-sm"
-        >
-          Voir les œuvres
-        </Link>
-        <Link
-          href="/works"
-          className="inline-block border border-white rounded px-4 py-2 text-sm"
-        >
-          Proposer une fin
-        </Link>
-      </div>
+        <div className="flex gap-4 mb-10">
+          <Link
+            href="/works"
+            className="px-4 py-2 rounded-md bg-white text-black text-sm font-semibold"
+          >
+            Voir les œuvres
+          </Link>
+          <Link
+            href="/works/w1/submit"
+            className="px-4 py-2 rounded-md border border-white text-sm font-semibold"
+          >
+            Proposer une fin
+          </Link>
+        </div>
 
-      <hr className="border-neutral-700 my-6" />
-
-      <p className="text-sm text-neutral-400">
-        Merci de marquer clairement vos spoilers et de rester respectueux.
-      </p>
-    </section>
+        <p className="text-xs text-neutral-400">
+          Merci de marquer clairement vos spoilers et de rester respectueux.
+        </p>
+      </section>
+    </main>
   );
 }

@@ -1,20 +1,26 @@
 "use client";
-import { useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { isAuthed } from "@/lib/auth";
 
 export default function RequireAuth({ children }) {
   const router = useRouter();
-  const pathname = usePathname();
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    // pages publiques autorisées sans login
-    // pour le moment avant d'inclure la bdd sur notre projet 
-    const publicPaths = ["/login", "/signup"];
-    if (!isAuthed() && !publicPaths.includes(pathname)) {
-      router.replace("/login");
+    // Pour l'instant isAuthed() renvoie toujours true,
+    // mais la structure est prête pour une vraie auth plus tard.
+    if (!isAuthed()) {
+      router.push("/login");
+    } else {
+      setReady(true);
     }
-  }, [router, pathname]);
+  }, [router]);
+
+  if (!ready) {
+    return null; // écran vide pendant la "vérification"
+  }
 
   return children;
 }

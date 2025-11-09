@@ -1,212 +1,200 @@
-import { use } from "react";
+"use client";
+
+import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
-import Poster from "@/components/Poster";
-import { WORKS, ENDINGS } from "@/lib/fakeDb";
+import { supabase } from "@/lib/supabaseClient";
 
-function Pill({ href, active, children }) {
-  return (
-    <Link
-      href={href}
-      className={
-        "px-3 py-1 rounded-full text-sm border " +
-        (active
-          ? "bg-white text-black border-white"
-          : "border-neutral-700 hover:border-neutral-500")
+const GENRES = ["drame", "science-fiction", "space opera"];
+
+export default function WorksPage() {
+  const [works, setWorks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [genreFilter, setGenreFilter] = useState(null);
+  const [kindFilter, setKindFilter] = useState("all");
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    async function loadWorks() {
+      setLoading(true);
+      setErrorMsg("");
+
+      const { data, error } = await supabase
+        .from("works")
+        .select(
+          `
+          id,
+          slug,
+          title,
+          year,
+          kind,
+          genre,
+          description,
+          poster_path,
+          endings ( id )
+        `
+        )
+        .order("title", { ascending: true });
+
+      if (error) {
+        console.error("Erreur Supabase (works):", error);
+        setErrorMsg("Erreur en chargeant les œuvres.");
+      } else {
+        setWorks(data ?? []);
       }
-    >
-      {children}
-    </Link>
-  );
-}
 
-export default function WorksPage({ searchParams }) {
-  const sp = use(searchParams);
+      setLoading(false);
+    }
 
-  const genre = (sp?.genre ?? "all").toLowerCase(); // drame, science-fiction, ...
-  const type = (sp?.type ?? "all").toLowerCase();   // movie, series, all
-  const query = (sp?.q ?? "").toLowerCase();        // recherche texte
+    loadWorks();
+  }, []);
 
-  // genres uniques à partir des données
-  const genres = Array.from(new Set(WORKS.map((w) => w.genre))).sort();
-
-  // filtrage
-  let list = WORKS.slice();
-
-  if (genre !== "all") {
-    list = list.filter(
-      (w) => (w.genre || "").toLowerCase() === genre
+  const filteredWorks = works
+    .filter((w) => (genreFilter ? w.genre === genreFilter : true))
+    .filter((w) =>
+      kindFilter === "all" ? true : w.kind === kindFilter
+    )
+    .filter((w) =>
+      search.trim()
+        ? w.title.toLowerCase().includes(search.trim().toLowerCase())
+        : true
     );
-  }
-
-  if (type !== "all") {
-    list = list.filter(
-      (w) => (w.type || "").toLowerCase() === type
-    );
-  }
-
-  if (query) {
-    list = list.filter((w) =>
-      w.title.toLowerCase().includes(query)
-    );
-  }
-
-  // petit label sympa pour le message "aucun résultat"
-  const typeLabel =
-    type === "movie" ? " (films)" :
-    type === "series" ? " (séries)" :
-    "";
 
   return (
-    <section>
-      <h2 className="text-xl font-semibold mb-4">Œuvres</h2>
+    <main className="min-h-screen bg-black text-white">
+      <section className="max-w-5xl mx-auto px-4 py-6">
+        <h1 className="text-3xl font-bold mb-6">Œuvres</h1>
 
-      {/* Barre genres */}
-      <nav className="flex flex-wrap gap-2 mb-3">
-        {/* Tous les genres */}
-        <Pill
-          href={`/works?${new URLSearchParams({
-            ...(type !== "all" ? { type } : {}),
-            ...(query ? { q: query } : {}),
-          })}`}
-          active={genre === "all"}
-        >
-          Tous
-        </Pill>
+        {/* Filtres */}
+        <div className="flex flex-col gap-4 mb-6">
+          {/* Genres */}
+          <div className="flex flex-wrap gap-3">
+            <button
+              className={`px-4 py-2 rounded-full border ${
+                !genreFilter ? "bg-white text-black" : "bg-transparent"
+              }`}
+              onClick={() => setGenreFilter(null)}
+            >
+              Tous les genres
+            </button>
 
-        {/* Genres individuels */}
-        {genres.map((g) => (
-          <Pill
-            key={g}
-            href={`/works?${new URLSearchParams({
-              genre: g,
-              ...(type !== "all" ? { type } : {}),
-              ...(query ? { q: query } : {}),
-            })}`}
-            active={genre === g.toLowerCase()}
+            {GENRES.map((g) => (
+              <button
+                key={g}
+                className={`px-4 py-2 rounded-full border capitalize ${
+                  genreFilter === g ? "bg-white text-black" : "bg-transparent"
+                }`}
+                onClick={() =>
+                  setGenreFilter(genreFilter === g ? null : g)
+                }
+              >
+                {g.charAt(0).toUpperCase() + g.slice(1)}
+              </button>
+            ))}
+          </div>
+
+          {/* Types (film / série) */}
+          <div className="flex flex-wrap gap-3">
+            <button
+              className={`px-4 py-2 rounded-full border ${
+                kindFilter === "all" ? "bg-white text-black" : "bg-transparent"
+              }`}
+              onClick={() => setKindFilter("all")}
+            >
+              Tous les types
+            </button>
+            <button
+              className={`px-4 py-2 rounded-full border ${
+                kindFilter === "film" ? "bg-white text-black" : "bg-transparent"
+              }`}
+              onClick={() => setKindFilter("film")}
+            >
+              Films
+            </button>
+            <button
+              className={`px-4 py-2 rounded-full border ${
+                kindFilter === "serie" ? "bg-white text-black" : "bg-transparent"
+              }`}
+              onClick={() => setKindFilter("serie")}
+            >
+              Séries
+            </button>
+          </div>
+
+          {/* Barre de recherche */}
+          <form
+            className="flex gap-3 max-w-xl"
+            onSubmit={(e) => e.preventDefault()}
           >
-            {g}
-          </Pill>
-        ))}
-      </nav>
+            <input
+              type="text"
+              placeholder="Rechercher un film ou une série..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="flex-1 px-4 py-2 rounded-md bg-neutral-900 border border-neutral-700 focus:outline-none focus:ring-2 focus:ring-white"
+            />
+            <button
+              type="submit"
+              className="px-4 py-2 rounded-md bg-white text-black font-semibold"
+            >
+              Chercher
+            </button>
+          </form>
+        </div>
 
-      {/* Barre type film / série */}
-      <nav className="flex flex-wrap gap-2 mb-3">
-        <Pill
-          href={`/works?${new URLSearchParams({
-            ...(genre !== "all" ? { genre } : {}),
-            ...(query ? { q: query } : {}),
-          })}`}
-          active={type === "all"}
-        >
-          Tous les types
-        </Pill>
-        <Pill
-          href={`/works?${new URLSearchParams({
-            type: "movie",
-            ...(genre !== "all" ? { genre } : {}),
-            ...(query ? { q: query } : {}),
-          })}`}
-          active={type === "movie"}
-        >
-          Films
-        </Pill>
-        <Pill
-          href={`/works?${new URLSearchParams({
-            type: "series",
-            ...(genre !== "all" ? { genre } : {}),
-            ...(query ? { q: query } : {}),
-          })}`}
-          active={type === "series"}
-        >
-          Séries
-        </Pill>
-      </nav>
+        {loading && <p>Chargement des œuvres...</p>}
+        {errorMsg && <p className="text-red-400 mb-4">{errorMsg}</p>}
 
-      {/* Barre de recherche */}
-      <form
-        className="mb-6 flex items-center gap-2"
-        method="GET"
-        action="/works"
-      >
-        {/* On conserve le genre/type sélectionnés */}
-        {genre && genre !== "all" && (
-          <input type="hidden" name="genre" value={genre} />
-        )}
-        {type && type !== "all" && (
-          <input type="hidden" name="type" value={type} />
+        {!loading && !errorMsg && filteredWorks.length === 0 && (
+          <p>Aucune œuvre.</p>
         )}
 
-        <input
-          type="text"
-          name="q"
-          defaultValue={sp?.q ?? ""}
-          placeholder="Rechercher un film ou une série…"
-          className="w-full max-w-md bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-sm"
-        />
-        <button
-          type="submit"
-          className="px-4 py-2 text-sm rounded border bg-white text-black"
-        >
-          Chercher
-        </button>
-        {query && (
-          <Link
-            href={`/works?${new URLSearchParams({
-              ...(genre !== "all" ? { genre } : {}),
-              ...(type !== "all" ? { type } : {}),
-            })}`}
-            className="text-sm underline text-neutral-300"
-            title="Effacer la recherche"
-          >
-            Effacer
-          </Link>
-        )}
-      </form>
+        {/* Grille des œuvres : cartes plus petites */}
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {filteredWorks.map((work) => {
+            const endingsCount = work.endings?.length ?? 0;
+            const posterSrc =
+              work.poster_path && work.poster_path.trim() !== ""
+                ? work.poster_path
+                : "/posters/placeholder.svg";
 
-      {/* Grille 3 colonnes */}
-      {list.length === 0 ? (
-        <p className="text-neutral-300">
-          Aucune œuvre
-          {genre !== "all" ? ` dans le genre “${genre}”` : ""}
-          {typeLabel}
-          {query ? ` pour “${query}”` : ""}.
-        </p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {list.map((w) => {
-            const endingsCount = ENDINGS.filter(
-              (e) => e.workId === w.id
-            ).length;
             return (
               <article
-                key={w.id}
-                className="border border-neutral-800 rounded overflow-hidden"
+                key={work.id}
+                className="bg-neutral-900 rounded-lg overflow-hidden flex flex-col w-full max-w-xs mx-auto"
               >
-                <Poster
-                  workId={w.id}
-                  alt={w.title}
-                  className="w-full h-[360px] object-cover"
-                />
-                <div className="p-4">
-                  <h3 className="font-medium">{w.title}</h3>
-                  <div className="text-sm text-neutral-400 mb-2">
-                    {w.year} · {w.type}
-                    {w.genre ? ` · ${w.genre}` : ""}
-                  </div>
-                  <div className="text-sm text-neutral-400 mb-3">
-                    {endingsCount} fin(s) proposée(s)
-                  </div>
+                <div className="relative w-full aspect-[2/3] bg-neutral-800">
+                  <Image
+                    src={posterSrc}
+                    alt={work.title}
+                    fill
+                    style={{ objectFit: "cover" }}
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                  />
+                </div>
 
-                  <div className="flex gap-2">
+                <div className="p-4 flex flex-col gap-2 flex-1">
+                  <h2 className="text-lg font-semibold">{work.title}</h2>
+                  <p className="text-sm text-neutral-400">
+                    {work.year ?? "—"} ·{" "}
+                    {work.kind === "film" ? "movie" : "serie"} ·{" "}
+                    {work.genre ?? "—"}
+                  </p>
+                  <p className="text-sm text-neutral-400">
+                    {endingsCount} fin(s) proposée(s)
+                  </p>
+
+                  <div className="mt-auto flex gap-3 pt-4">
                     <Link
-                      href={`/works/${w.id}`}
-                      className="px-3 py-2 text-sm rounded border bg-white text-black"
+                      href={`/works/${work.slug}`}
+                      className="flex-1 text-center px-3 py-2 rounded-md bg-white text-black text-sm font-semibold"
                     >
                       Voir les fins
                     </Link>
                     <Link
-                      href={`/works/${w.id}/submit`}
-                      className="px-3 py-2 text-sm rounded border hover:border-neutral-500"
+                      href={`/works/${work.slug}/submit`}
+                      className="flex-1 text-center px-3 py-2 rounded-md border border-white text-sm font-semibold"
                     >
                       Proposer une fin
                     </Link>
@@ -216,7 +204,7 @@ export default function WorksPage({ searchParams }) {
             );
           })}
         </div>
-      )}
-    </section>
+      </section>
+    </main>
   );
 }

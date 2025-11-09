@@ -1,72 +1,181 @@
 "use client";
-import { use } from "react";
-import { useState } from "react";
+
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { WORKS } from "@/lib/fakeDb";
+import { supabase } from "../../../../lib/supabaseClient";
 
-// Client Component, on utilise React.use() pour déballer params
-export default function SubmitEndingPage({ params }) {
-  const { workId } = use(params); //  déballage côté client
+export default function SubmitEndingPage() {
+  const { workId } = useParams(); // slug
+  const router = useRouter();
 
-  const work = WORKS.find((w) => w.id === workId);
-  if (!work) return <p>Œuvre introuvable.</p>;
+  const [work, setWork] = useState(null);
+  const [loadingWork, setLoadingWork] = useState(true);
+  const [loadError, setLoadError] = useState("");
 
-  const [author, setAuthor] = useState("");
+  const [title, setTitle] = useState("");
+  const [authorName, setAuthorName] = useState("");
   const [content, setContent] = useState("");
-  const [ok, setOk] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
 
-  const onSubmit = (e) => {
+  useEffect(() => {
+    async function loadWork() {
+      setLoadingWork(true);
+      setLoadError("");
+
+      const { data, error } = await supabase
+        .from("works")
+        .select("id, slug, title")
+        .eq("slug", workId) 
+        .single();
+
+      if (error) {
+        console.error("Erreur Supabase (work submit):", error);
+        setLoadError("Impossible de charger cette œuvre.");
+      } else if (!data) {
+        setLoadError("Œuvre introuvable.");
+      } else {
+        setWork(data);
+      }
+
+      setLoadingWork(false);
+    }
+
+    if (workId) {
+      loadWork();
+    }
+  }, [workId]);
+
+  async function handleSubmit(e) {
     e.preventDefault();
-    setOk(true);
-    // plus tard: POST vers Supabase
-  };
+    if (!work) return;
+
+    setSubmitting(true);
+    setErrorMsg("");
+    setSuccessMsg("");
+
+    try {
+      const { error } = await supabase.from("endings").insert({
+        work_id: work.id,
+        title: title || null,
+        author_name: authorName || "Anonyme",
+        content,
+      });
+
+      if (error) {
+        console.error("Erreur insert Supabase (ending):", error);
+        setErrorMsg(
+          "Impossible d'enregistrer la fin (erreur Supabase)."
+        );
+      } else {
+        setSuccessMsg("Fin enregistrée avec succès !");
+        setTitle("");
+        setAuthorName("");
+        setContent("");
+
+        
+        router.push(`/works/${work.slug}`);
+      }
+    } catch (err) {
+      console.error(err);
+      setErrorMsg(
+        "Une erreur inattendue est survenue lors de l'enregistrement."
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (loadingWork) {
+    return (
+      <main className="min-h-screen bg-black text-white px-8 py-6">
+        <p>Chargement...</p>
+      </main>
+    );
+  }
+
+  if (loadError || !work) {
+    return (
+      <main className="min-h-screen bg-black text-white px-8 py-6">
+        <p className="mb-4">{loadError || "Œuvre introuvable."}</p>
+        <Link
+          href="/works"
+          className="inline-block px-4 py-2 rounded-md bg-white text-black font-semibold"
+        >
+          Retour aux œuvres
+        </Link>
+      </main>
+    );
+  }
 
   return (
-    <section className="max-w-xl">
-      <h2 className="text-xl font-semibold mb-2">
-        Proposer une fin — {work.title}
-      </h2>
+    <main className="min-h-screen bg-black text-white px-8 py-6 max-w-3xl">
+      <Link
+        href={`/works/${work.slug}`}
+        className="inline-block mb-4 text-sm text-neutral-300 hover:underline"
+      >
+        ← Retour aux fins
+      </Link>
 
-      {ok && (
-        <div className="rounded border border-green-700 bg-green-900/30 p-3 mb-3">
-          Fin envoyée (simulation). On branchera Supabase ensuite.
-        </div>
-      )}
+      <h1 className="text-2xl font-bold mb-2">
+        Proposer une fin pour &laquo; {work.title} &raquo;
+      </h1>
 
-      <form onSubmit={onSubmit} className="space-y-3">
-        <label className="block">
-          <span className="text-sm">Auteur</span>
+      <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-4">
+        <div>
+          <label className="block text-sm mb-1">
+            Titre de la fin (optionnel)
+          </label>
           <input
-            className="mt-1 w-full bg-neutral-900 border border-neutral-700 rounded px-3 py-2"
-            value={author}
-            onChange={(e) => setAuthor(e.target.value)}
-            required
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="w-full px-3 py-2 rounded-md bg-neutral-900 border border-neutral-700 focus:outline-none focus:ring-2 focus:ring-white"
           />
-        </label>
+        </div>
 
-        <label className="block">
-          <span className="text-sm">Votre fin</span>
+        <div>
+          <label className="block text-sm mb-1">
+            Auteur (optionnel)
+          </label>
+          <input
+            type="text"
+            value={authorName}
+            onChange={(e) => setAuthorName(e.target.value)}
+            className="w-full px-3 py-2 rounded-md bg-neutral-900 border border-neutral-700 focus:outline-none focus:ring-2 focus:ring-white"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm mb-1">
+            Contenu de la fin <span className="text-red-400">*</span>
+          </label>
           <textarea
-            className="mt-1 w-full bg-neutral-900 border border-neutral-700 rounded px-3 py-2 h-40"
+            required
+            rows={8}
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            required
+            className="w-full px-3 py-2 rounded-md bg-neutral-900 border border-neutral-700 focus:outline-none focus:ring-2 focus:ring-white"
           />
-        </label>
+        </div>
+
+        {errorMsg && (
+          <p className="text-red-400 text-sm">{errorMsg}</p>
+        )}
+        {successMsg && (
+          <p className="text-green-400 text-sm">{successMsg}</p>
+        )}
 
         <button
           type="submit"
-          className="bg-white text-black border rounded px-4 py-2 text-sm"
+          disabled={submitting}
+          className="self-start px-4 py-2 rounded-md bg-white text-black font-semibold disabled:opacity-60"
         >
-          Publier
+          {submitting ? "Enregistrement..." : "Publier la fin"}
         </button>
       </form>
-
-      <div className="mt-6">
-        <Link href={`/works/${workId}`} className="underline text-sm">
-          ← Retour à l’œuvre
-        </Link>
-      </div>
-    </section>
+    </main>
   );
 }
