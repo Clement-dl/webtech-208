@@ -3,10 +3,24 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { isAuthed, logout } from "@/lib/auth";
+import { useEffect, useState } from "react";
 
 export default function Nav() {
   const pathname = usePathname();
-  const authed = isAuthed();
+
+  const [mounted, setMounted] = useState(false);
+  const [authed, setAuthed] = useState(false);
+
+  // 1) éviter l’erreur d’hydratation : on ne rend rien tant qu’on n’est pas monté
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // 2) à chaque changement de page, on relit le statut d’auth
+  useEffect(() => {
+    if (!mounted) return;
+    setAuthed(isAuthed());
+  }, [pathname, mounted]);
 
   const linkClass = (href) =>
     `px-3 py-2 text-sm font-semibold ${
@@ -17,9 +31,14 @@ export default function Nav() {
 
   const handleLogout = async () => {
     await logout();
-    // on renvoie vers la page de connexion
+    setAuthed(false);
     window.location.href = "/login";
   };
+
+  if (!mounted) {
+    // même HTML côté serveur et client → pas d’erreur d’hydratation
+    return null;
+  }
 
   return (
     <nav className="w-full border-b border-neutral-800 bg-black text-white">

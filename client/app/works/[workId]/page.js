@@ -5,10 +5,11 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { supabase } from "@/lib/supabaseClient";
-import { DEMO_USER_ID } from "@/lib/auth"; // id d'utilisateur de test
+import { getCurrentUserId } from "@/lib/auth";
 
 export default function WorkPage() {
   const { workId } = useParams(); // slug : "w1", "w2"...
+
   const [work, setWork] = useState(null);
   const [endings, setEndings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,7 +19,13 @@ export default function WorkPage() {
   const [votingFor, setVotingFor] = useState(null);
   const [voteError, setVoteError] = useState("");
 
-  // Chargement de l’œuvre + fins
+  // utilisateur courant + fins déjà votées
+  const [userId, setUserId] = useState(null);
+  const [userVotes, setUserVotes] = useState(new Set());
+
+  // ─────────────────────────────────────────────
+  // 1. Chargement de l’œuvre + fins (avec nombre de votes)
+  // ─────────────────────────────────────────────
   useEffect(() => {
     async function loadWork() {
       setLoading(true);
@@ -41,12 +48,12 @@ export default function WorkPage() {
             title,
             author_name,
             content,
-            votes_count,
-            created_at
+            created_at,
+            votes:votes(count)
           )
         `
         )
-        .eq("slug", workId) // on filtre bien sur le slug
+        .eq("slug", workId)
         .single();
 
       if (error) {
@@ -55,8 +62,27 @@ export default function WorkPage() {
       } else if (!data) {
         setErrorMsg("Œuvre introuvable.");
       } else {
-        setWork(data);
-        setEndings(data.endings ?? []);
+        const endingsWithCounts = (data.endings ?? []).map((e) => ({
+          id: e.id,
+          title: e.title,
+          author_name: e.author_name,
+          content: e.content,
+          created_at: e.created_at,
+          votes_count: e.votes?.[0]?.count ?? 0,
+        }));
+
+        setWork({
+          id: data.id,
+          slug: data.slug,
+          title: data.title,
+          year: data.year,
+          kind: data.kind,
+          genre: data.genre,
+          description: data.description,
+          poster_path: data.poster_path,
+        });
+
+        setEndings(endingsWithCounts);
       }
 
       setLoading(false);
@@ -67,20 +93,64 @@ export default function WorkPage() {
     }
   }, [workId]);
 
-  // Gestion du vote pour une fin
+  // ─────────────────────────────────────────────
+  // 2. Chargement de l’utilisateur + des fins qu’il a déjà votées
+  // ─────────────────────────────────────────────
+  useEffect(() => {
+    async function loadUserAndVotes() {
+      const id = await getCurrentUserId();
+      setUserId(id);
+
+      if (!id) {
+        setUserVotes(new Set());
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("votes")
+        .select("ending_id")
+        .eq("user_id", id);
+
+      if (error) {
+        console.error("Erreur chargement votes utilisateur:", error);
+        setUserVotes(new Set());
+        return;
+      }
+
+      setUserVotes(new Set(data.map((v) => v.ending_id)));
+    }
+
+    loadUserAndVotes();
+  }, []);
+
+  // ─────────────────────────────────────────────
+  // 3. Gestion du vote
+  // ─────────────────────────────────────────────
   async function handleVote(endingId) {
     if (!work) return;
+
+    // pas connecté
+    if (!userId) {
+      setVoteError("Vous devez être connecté pour voter.");
+      return;
+    }
+
+    // déjà voté pour cette fin
+    if (userVotes.has(endingId)) {
+      setVoteError("Vous avez déjà voté pour cette fin.");
+      return;
+    }
 
     setVotingFor(endingId);
     setVoteError("");
 
     try {
-      // 1) on insère / met à jour le vote pour DEMO_USER_ID
+      // 1) enregistre le vote (PK = user_id + ending_id)
       const { error: upsertError } = await supabase
         .from("votes")
         .upsert(
           {
-            user_id: DEMO_USER_ID,
+            user_id: userId,
             ending_id: endingId,
           },
           {
@@ -93,7 +163,7 @@ export default function WorkPage() {
         throw upsertError;
       }
 
-      // 2) on recharge les fins pour avoir les votes_count à jour
+      // 2) recharge les fins avec le nombre de votes à jour
       const { data: endingsData, error: endingsError } = await supabase
         .from("endings")
         .select(
@@ -102,8 +172,8 @@ export default function WorkPage() {
           title,
           author_name,
           content,
-          votes_count,
-          created_at
+          created_at,
+          votes:votes(count)
         `
         )
         .eq("work_id", work.id)
@@ -114,7 +184,23 @@ export default function WorkPage() {
         throw endingsError;
       }
 
-      setEndings(endingsData ?? []);
+      const normalized = (endingsData ?? []).map((e) => ({
+        id: e.id,
+        title: e.title,
+        author_name: e.author_name,
+        content: e.content,
+        created_at: e.created_at,
+        votes_count: e.votes?.[0]?.count ?? 0,
+      }));
+
+      setEndings(normalized);
+
+      // 3) on marque la fin comme déjà votée côté client
+      setUserVotes((prev) => {
+        const next = new Set(prev);
+        next.add(endingId);
+        return next;
+      });
     } catch (err) {
       console.error("Erreur lors du vote :", err);
       setVoteError("Impossible d'enregistrer le vote.");
@@ -123,6 +209,9 @@ export default function WorkPage() {
     }
   }
 
+  // ─────────────────────────────────────────────
+  // 4. Rendu
+  // ─────────────────────────────────────────────
   if (loading) {
     return (
       <main className="min-h-screen bg-black text-white px-8 py-6">
@@ -203,39 +292,49 @@ export default function WorkPage() {
           )}
 
           <div className="flex flex-col gap-4">
-            {endings.map((ending) => (
-              <article
-                key={ending.id}
-                className="border border-neutral-700 rounded-md p-4 bg-neutral-900"
-              >
-                <h3 className="font-semibold text-lg mb-1">
-                  {ending.title || "Fin sans titre"}
-                </h3>
-                <p className="text-sm text-neutral-400 mb-2">
-                  Proposée par{" "}
-                  <span className="font-medium">
-                    {ending.author_name || "Anonyme"}
-                  </span>
-                  {ending.votes_count != null && (
-                    <> — {ending.votes_count} vote(s)</>
-                  )}
-                </p>
-                <p className="text-sm whitespace-pre-wrap mb-3">
-                  {ending.content}
-                </p>
+            {endings.map((ending) => {
+              const alreadyVoted = userVotes.has(ending.id);
 
-                <button
-                  type="button"
-                  onClick={() => handleVote(ending.id)}
-                  disabled={votingFor === ending.id}
-                  className="px-3 py-1 rounded-md bg.white text-black text-sm font-semibold disabled:opacity-60 bg-white"
+              return (
+                <article
+                  key={ending.id}
+                  className="border border-neutral-700 rounded-md p-4 bg-neutral-900"
                 >
-                  {votingFor === ending.id
-                    ? "Enregistrement du vote..."
-                    : "Voter pour cette fin"}
-                </button>
-              </article>
-            ))}
+                  <h3 className="font-semibold text-lg mb-1">
+                    {ending.title || "Fin sans titre"}
+                  </h3>
+                  <p className="text-sm text-neutral-400 mb-2">
+                    Proposée par{" "}
+                    <span className="font-medium">
+                      {ending.author_name || "Anonyme"}
+                    </span>
+                    {ending.votes_count != null && (
+                      <> — {ending.votes_count} vote(s)</>
+                    )}
+                  </p>
+                  <p className="text-sm whitespace-pre-wrap mb-3">
+                    {ending.content}
+                  </p>
+
+                  <button
+                    type="button"
+                    onClick={() => handleVote(ending.id)}
+                    disabled={
+                      votingFor === ending.id || !userId || alreadyVoted
+                    }
+                    className="px-3 py-1 rounded-md bg-white text-black text-sm font-semibold disabled:opacity-60"
+                  >
+                    {alreadyVoted
+                      ? "Vous avez déjà voté pour cette fin"
+                      : votingFor === ending.id
+                      ? "Enregistrement du vote..."
+                      : !userId
+                      ? "Connectez-vous pour voter"
+                      : "Voter pour cette fin"}
+                  </button>
+                </article>
+              );
+            })}
           </div>
         </section>
       </div>
