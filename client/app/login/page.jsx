@@ -1,17 +1,31 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { login } from "@/lib/auth";
 
 export default function LoginPage() {
   const router = useRouter();
 
-  const handleLogin = (e) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // faux login : on marque l'utilisateur comme connecté dans localStorage
-    login();
-    // après connexion, on redirige vers les œuvres
-    router.push("/works");
+    setErrorMsg("");
+    setLoading(true);
+
+    try {
+      await login({ email, password });
+      router.push("/works");
+    } catch (err) {
+      console.error(err);
+      setErrorMsg(err.message ?? "Erreur pendant la connexion.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -21,20 +35,42 @@ export default function LoginPage() {
           Se connecter
         </h1>
 
-        <p className="text-sm text-neutral-300 text-center mb-6">
-          Pour l’instant, la connexion est simulée. Clique simplement
-          sur le bouton ci-dessous pour accéder au site.
-        </p>
-
         <form
           onSubmit={handleLogin}
-          className="flex flex-col items-center gap-4"
+          className="flex flex-col items-stretch gap-4"
         >
+          <div>
+            <label className="block text-sm mb-1">Email</label>
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-3 py-2 rounded-md bg-neutral-900 border border-neutral-700 focus:outline-none focus:ring-2 focus:ring-white"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm mb-1">Mot de passe</label>
+            <input
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-3 py-2 rounded-md bg-neutral-900 border border-neutral-700 focus:outline-none focus:ring-2 focus:ring-white"
+            />
+          </div>
+
+          {errorMsg && (
+            <p className="text-sm text-red-400">{errorMsg}</p>
+          )}
+
           <button
             type="submit"
-            className="w-full px-4 py-2 rounded-md bg-white text-black font-semibold"
+            disabled={loading}
+            className="w-full px-4 py-2 rounded-md bg-white text-black font-semibold disabled:opacity-60"
           >
-            Se connecter
+            {loading ? "Connexion..." : "Se connecter"}
           </button>
         </form>
       </section>

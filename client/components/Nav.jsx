@@ -15,8 +15,8 @@ export default function Nav() {
         : "text-neutral-300 hover:text-white"
     }`;
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     // on renvoie vers la page de connexion
     window.location.href = "/login";
   };

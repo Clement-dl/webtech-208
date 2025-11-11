@@ -109,10 +109,11 @@ create policy "Users can update own profile"
   with check (auth.uid() = id);
 
 drop policy if exists "Users can insert own profile" on public.profiles;
-create policy "Users can insert own profile"
+create policy "Anyone can insert profiles (demo)"
   on public.profiles
   for insert
-  with check (auth.uid() = id);
+  with check (true);
+
 
 -- -------------------------
 --  Policies : works
