@@ -17,15 +17,17 @@ export default function LoginPage() {
     setErrorMsg("");
     setLoading(true);
 
-    try {
-      await login({ email, password });
-      router.push("/works");
-    } catch (err) {
-      console.error(err);
-      setErrorMsg(err.message ?? "Erreur pendant la connexion.");
-    } finally {
+    const { user, error } = await login({ email, password });
+
+    if (error || !user) {
+      console.error(error);
+      setErrorMsg(error?.message ?? "Erreur pendant la connexion.");
       setLoading(false);
+      return;
     }
+
+    // Succès : on redirige vers les œuvres
+    router.push("/works");
   };
 
   return (

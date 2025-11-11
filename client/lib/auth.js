@@ -29,6 +29,7 @@ export async function signup({ email, password, username, role }) {
     id: user.id,
     username,
     role,
+    email,
   });
 
   if (profileError) {

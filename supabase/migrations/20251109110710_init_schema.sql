@@ -28,6 +28,14 @@ create table if not exists public.profiles (
   created_at timestamptz not null default now()
 );
 
+alter table public.profiles
+  add column if not exists email text;
+
+update public.profiles p
+set email = u.email
+from auth.users u
+where p.id = u.id;
+
 -- =========================================================
 --  Table works (films / séries)
 -- =========================================================
