@@ -1,26 +1,62 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { isAuthed, logout } from "@/lib/auth";
-import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabaseClient";
+import { logout, getCurrentUserRole } from "@/lib/auth";
 
 export default function Nav() {
   const pathname = usePathname();
-
-  const [mounted, setMounted] = useState(false);
   const [authed, setAuthed] = useState(false);
+  const [role, setRole] = useState(null); // "user" | "admin" | null
 
-  // 1) éviter l’erreur d’hydratation : on ne rend rien tant qu’on n’est pas monté
   useEffect(() => {
-    setMounted(true);
+    let mounted = true;
+
+    async function refreshAuth() {
+      const { data, error } = await supabase.auth.getUser();
+
+      if (!mounted) return;
+
+      if (error || !data?.user) {
+        setAuthed(false);
+        setRole(null);
+        return;
+      }
+
+      setAuthed(true);
+
+      // va lire profiles.role (helper défini dans lib/auth.js)
+      const userRole = await getCurrentUserRole();
+      if (!mounted) return;
+      setRole(userRole);
+    }
+
+    refreshAuth();
+
+    // se met à jour quand on se connecte / déconnecte
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (!mounted) return;
+
+      if (!session?.user) {
+        setAuthed(false);
+        setRole(null);
+      } else {
+        setAuthed(true);
+        const userRole = await getCurrentUserRole();
+        if (!mounted) return;
+        setRole(userRole);
+      }
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
-
-  // 2) à chaque changement de page, on relit le statut d’auth
-  useEffect(() => {
-    if (!mounted) return;
-    setAuthed(isAuthed());
-  }, [pathname, mounted]);
 
   const linkClass = (href) =>
     `px-3 py-2 text-sm font-semibold ${
@@ -31,14 +67,8 @@ export default function Nav() {
 
   const handleLogout = async () => {
     await logout();
-    setAuthed(false);
     window.location.href = "/login";
   };
-
-  if (!mounted) {
-    // même HTML côté serveur et client → pas d’erreur d’hydratation
-    return null;
-  }
 
   return (
     <nav className="w-full border-b border-neutral-800 bg-black text-white">
@@ -58,10 +88,18 @@ export default function Nav() {
             <Link href="/about" className={linkClass("/about")}>
               About
             </Link>
+            {role === "admin" && (
+              <Link
+                href="/works/publish"
+                className={linkClass("/works/publish")}
+              >
+                Publier une œuvre
+              </Link>
+            )}
           </div>
         </div>
 
-        {/* Liens de droite : login / logout / inscription */}
+        {/* Droite : login / logout */}
         <div className="flex items-center gap-4 text-sm">
           {authed ? (
             <button

@@ -241,6 +241,25 @@ create policy "Users can delete their votes"
   using (true);
 
 -- =========================================================
+--  Policies pour le bucket posters
+-- =========================================================
+
+-- Lecture publique : tout le monde peut voir les affiches
+drop policy if exists "Public can view posters" on storage.objects;
+create policy "Public can view posters"
+on storage.objects
+for select
+using (bucket_id = 'posters');
+
+-- Upload réservé aux utilisateurs authentifiés
+drop policy if exists "Authenticated users can upload posters" on storage.objects;
+create policy "Authenticated users can upload posters"
+on storage.objects
+for insert
+to authenticated
+with check (bucket_id = 'posters');
+
+-- =========================================================
 --  Données d’exemple (Œuvres + fins)
 --  (AUCUN utilisateur inséré ici)
 -- =========================================================

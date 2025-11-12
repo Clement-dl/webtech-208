@@ -1,20 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
 
-const GENRES = ["drame", "science-fiction", "space opera"];
+// helpers
+const norm = (s) => (s ? s.trim().toLowerCase() : "");
+const titleCase = (s) => s.replace(/\b\w/g, (m) => m.toUpperCase());
 
 export default function WorksPage() {
   const [works, setWorks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
-  const [genreFilter, setGenreFilter] = useState(null);
-  const [kindFilter, setKindFilter] = useState("all");
+  const [genreFilter, setGenreFilter] = useState(null); // store normalized genre
+  const [kindFilter, setKindFilter] = useState("all"); // 'all' | 'film' | 'serie'
   const [search, setSearch] = useState("");
 
+  // Load works once
   useEffect(() => {
     async function loadWorks() {
       setLoading(true);
@@ -50,11 +53,20 @@ export default function WorksPage() {
     loadWorks();
   }, []);
 
+  // Build genre list dynamically from current works
+  const genres = useMemo(() => {
+    const set = new Set();
+    for (const w of works) {
+      const g = norm(w.genre);
+      if (g) set.add(g);
+    }
+    return Array.from(set).sort(); // array of normalized genres
+  }, [works]);
+
+  // Apply filters
   const filteredWorks = works
-    .filter((w) => (genreFilter ? w.genre === genreFilter : true))
-    .filter((w) =>
-      kindFilter === "all" ? true : w.kind === kindFilter
-    )
+    .filter((w) => (genreFilter ? norm(w.genre) === genreFilter : true))
+    .filter((w) => (kindFilter === "all" ? true : w.kind === kindFilter))
     .filter((w) =>
       search.trim()
         ? w.title.toLowerCase().includes(search.trim().toLowerCase())
@@ -68,7 +80,7 @@ export default function WorksPage() {
 
         {/* Filtres */}
         <div className="flex flex-col gap-4 mb-6">
-          {/* Genres */}
+          {/* Genres dynamiques */}
           <div className="flex flex-wrap gap-3">
             <button
               className={`px-4 py-2 rounded-full border ${
@@ -79,7 +91,7 @@ export default function WorksPage() {
               Tous les genres
             </button>
 
-            {GENRES.map((g) => (
+            {genres.map((g) => (
               <button
                 key={g}
                 className={`px-4 py-2 rounded-full border capitalize ${
@@ -89,7 +101,7 @@ export default function WorksPage() {
                   setGenreFilter(genreFilter === g ? null : g)
                 }
               >
-                {g.charAt(0).toUpperCase() + g.slice(1)}
+                {titleCase(g)}
               </button>
             ))}
           </div>
@@ -150,7 +162,7 @@ export default function WorksPage() {
           <p>Aucune œuvre.</p>
         )}
 
-        {/* Grille des œuvres : cartes plus petites */}
+        {/* Grille des œuvres */}
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filteredWorks.map((work) => {
             const endingsCount = work.endings?.length ?? 0;
