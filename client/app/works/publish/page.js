@@ -180,8 +180,8 @@ export default function PublishWorkPage() {
               className="block text-sm"
               required
             />
-            <p className="text-xs text-neutral-400 mt-1">
-              L'image sera uploadée dans le bucket Supabase{" "}
+           <p className="text-xs text-neutral-400 mt-1">
+              L&apos;image sera uploadée dans le bucket Supabase{" "}
               <code>posters</code>.
             </p>
           </div>
