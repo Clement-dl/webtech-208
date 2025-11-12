@@ -17,7 +17,6 @@ export default function WorksPage() {
   const [kindFilter, setKindFilter] = useState("all"); // 'all' | 'film' | 'serie'
   const [search, setSearch] = useState("");
 
-  // Load works once
   useEffect(() => {
     async function loadWorks() {
       setLoading(true);
@@ -25,8 +24,7 @@ export default function WorksPage() {
 
       const { data, error } = await supabase
         .from("works")
-        .select(
-          `
+        .select(`
           id,
           slug,
           title,
@@ -36,8 +34,7 @@ export default function WorksPage() {
           description,
           poster_path,
           endings ( id )
-        `
-        )
+        `)
         .order("title", { ascending: true });
 
       if (error) {
@@ -53,17 +50,15 @@ export default function WorksPage() {
     loadWorks();
   }, []);
 
-  // Build genre list dynamically from current works
   const genres = useMemo(() => {
     const set = new Set();
     for (const w of works) {
       const g = norm(w.genre);
       if (g) set.add(g);
     }
-    return Array.from(set).sort(); // array of normalized genres
+    return Array.from(set).sort();
   }, [works]);
 
-  // Apply filters
   const filteredWorks = works
     .filter((w) => (genreFilter ? norm(w.genre) === genreFilter : true))
     .filter((w) => (kindFilter === "all" ? true : w.kind === kindFilter))
@@ -80,7 +75,6 @@ export default function WorksPage() {
 
         {/* Filtres */}
         <div className="flex flex-col gap-4 mb-6">
-          {/* Genres dynamiques */}
           <div className="flex flex-wrap gap-3">
             <button
               className={`px-4 py-2 rounded-full border ${
@@ -97,16 +91,13 @@ export default function WorksPage() {
                 className={`px-4 py-2 rounded-full border capitalize ${
                   genreFilter === g ? "bg-white text-black" : "bg-transparent"
                 }`}
-                onClick={() =>
-                  setGenreFilter(genreFilter === g ? null : g)
-                }
+                onClick={() => setGenreFilter(genreFilter === g ? null : g)}
               >
                 {titleCase(g)}
               </button>
             ))}
           </div>
 
-          {/* Types (film / série) */}
           <div className="flex flex-wrap gap-3">
             <button
               className={`px-4 py-2 rounded-full border ${
@@ -134,7 +125,6 @@ export default function WorksPage() {
             </button>
           </div>
 
-          {/* Barre de recherche */}
           <form
             className="flex gap-3 max-w-xl"
             onSubmit={(e) => e.preventDefault()}
@@ -157,12 +147,10 @@ export default function WorksPage() {
 
         {loading && <p>Chargement des œuvres...</p>}
         {errorMsg && <p className="text-red-400 mb-4">{errorMsg}</p>}
-
         {!loading && !errorMsg && filteredWorks.length === 0 && (
           <p>Aucune œuvre.</p>
         )}
 
-        {/* Grille des œuvres */}
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filteredWorks.map((work) => {
             const endingsCount = work.endings?.length ?? 0;
@@ -194,7 +182,7 @@ export default function WorksPage() {
                     {work.genre ?? "—"}
                   </p>
                   <p className="text-sm text-neutral-400">
-                    {endingsCount} fin(s) proposée(s)
+                    {endingsCount} fin(s) propos&eacute;e(s)
                   </p>
 
                   <div className="mt-auto flex gap-3 pt-4">
