@@ -97,5 +97,5 @@ Projet Next.js (App Router) : proposer et voter des fins alternatives pour des �
 ## Contributeurs
 
 - Omar El Alami El Fellousse 
-- Clément  D'Alberto
+- Clément  Dalberto
 - Luc Bernard Fernand BANAG LIBITE
