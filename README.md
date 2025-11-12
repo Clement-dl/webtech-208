@@ -98,4 +98,4 @@ Projet Next.js (App Router) : proposer et voter des fins alternatives pour des ≈
 
 - Omar El Alami El Fellousse 
 - Cl√©ment  D'Alberto
-- Luc Bernard
+- Luc Bernard Fernand BANAG LIBITE
