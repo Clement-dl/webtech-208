@@ -233,19 +233,20 @@ drop policy if exists "Users can see their votes" on public.votes;
 create policy "Users can see their votes"
   on public.votes
   for select
-  using (true);
+  using (true);              -- tout le monde peut voir les votes 
 
 drop policy if exists "Users can insert their votes" on public.votes;
 create policy "Users can insert their votes"
   on public.votes
   for insert
-  with check (true);
+  with check (user_id = auth.uid());   -- on n’insère que pour soi-même
 
 drop policy if exists "Users can delete their votes" on public.votes;
 create policy "Users can delete their votes"
   on public.votes
   for delete
-  using (true);
+  using (user_id = auth.uid());        -- on ne supprime que ses propres votes
+
 
 -- =========================================================
 --  Policies pour le bucket posters
