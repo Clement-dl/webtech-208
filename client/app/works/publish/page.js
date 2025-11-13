@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
+import { getCurrentUserId } from "@/lib/auth";
 
 export default function PublishWorkPage() {
   const router = useRouter();
@@ -18,85 +19,93 @@ export default function PublishWorkPage() {
   const [errorMsg, setErrorMsg] = useState("");
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    console.log("handleSubmit démarré");
-    setErrorMsg("");
+  e.preventDefault();
+  console.log("handleSubmit démarré");
+  setErrorMsg("");
 
-    if (!title.trim()) {
-      setErrorMsg("Le titre est obligatoire.");
-      return;
+  if (!title.trim()) {
+    setErrorMsg("Le titre est obligatoire.");
+    return;
+  }
+  if (!file) {
+    setErrorMsg("Merci de choisir une affiche (fichier image).");
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    // 0) Récupérer l'utilisateur courant
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    if (userError || !userData?.user) {
+      throw new Error("Utilisateur non authentifié.");
     }
-    if (!file) {
-      setErrorMsg("Merci de choisir une affiche (fichier image).");
-      return;
-    }
+    const userId = userData.user.id;   
 
-    setLoading(true);
+    // 1) Upload de l'image dans le bucket "posters"
+    console.log("→ Upload de l'affiche dans Storage…");
+    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    const randomSlug = "w" + Math.random().toString(36).slice(2, 8);
+    const storagePath = `${randomSlug}.${ext}`;
 
-    try {
-      // 1) Upload de l'image dans le bucket "posters"
-      console.log("→ Upload de l'affiche dans Storage…");
-      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-      const randomSlug = "w" + Math.random().toString(36).slice(2, 8);
-      const storagePath = `${randomSlug}.${ext}`;
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from("posters")
+      .upload(storagePath, file);
 
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from("posters")
-        .upload(storagePath, file);
+    console.log("   Résultat upload:", uploadData, uploadError);
 
-      console.log("   Résultat upload:", uploadData, uploadError);
-
-      if (uploadError) {
-        throw new Error(
-          "Échec de l'upload de l'affiche : " + uploadError.message
-        );
-      }
-
-      // 2) URL publique de l'image
-      const { data: publicUrlData } = supabase.storage
-        .from("posters")
-        .getPublicUrl(uploadData.path);
-
-      const posterUrl = publicUrlData.publicUrl;
-      console.log("→ URL publique de l'affiche :", posterUrl);
-
-      // 3) Insertion de l'œuvre (RLS : seuls les admins seront acceptés)
-      console.log("→ Insertion de l'œuvre dans works…");
-      const { data: workData, error: workError } = await supabase
-        .from("works")
-        .insert({
-          slug: randomSlug,
-          title: title.trim(),
-          year: year ? Number(year) : null,
-          kind,
-          genre: genre.trim() || null,
-          description: description.trim() || null,
-          poster_path: posterUrl,
-        })
-        .select("slug")
-        .single();
-
-      console.log("   Résultat insert works :", workData, workError);
-
-      if (workError) {
-        // typiquement : RLS si tu n'es pas admin
-        throw new Error(
-          "Échec de l'enregistrement de l'œuvre : " + workError.message
-        );
-      }
-
-      console.log("→ Publication OK, redirection /works/" + workData.slug);
-      router.push(`/works/${workData.slug}`);
-    } catch (err) {
-      console.error("Erreur pendant la publication :", err);
-      setErrorMsg(
-        err?.message || "Erreur inattendue pendant la publication."
+    if (uploadError) {
+      throw new Error(
+        "Échec de l'upload de l'affiche : " + uploadError.message
       );
-    } finally {
-      console.log("handleSubmit terminé (finally)");
-      setLoading(false);
     }
-  };
+
+    // 2) URL publique
+    const { data: publicUrlData } = supabase.storage
+      .from("posters")
+      .getPublicUrl(uploadData.path);
+
+    const posterUrl = publicUrlData.publicUrl;
+    console.log("→ URL publique de l'affiche :", posterUrl);
+
+    // 3) Insertion dans works avec created_by = userId
+    console.log("→ Insertion de l'œuvre dans works…");
+    const { data: workData, error: workError } = await supabase
+      .from("works")
+      .insert({
+        slug: randomSlug,
+        title: title.trim(),
+        year: year ? Number(year) : null,
+        kind,
+        genre: genre.trim() || null,
+        description: description.trim() || null,
+        poster_path: posterUrl,
+        created_by: userId,          
+      })
+      .select("slug")
+      .single();
+
+    console.log("   Résultat insert works :", workData, workError);
+
+    if (workError) {
+      throw new Error(
+        "Échec de l'enregistrement de l'œuvre : " + workError.message
+      );
+    }
+
+    console.log("→ Publication OK, redirection /works/" + workData.slug);
+    router.push(`/works/${workData.slug}`);
+  } catch (err) {
+    console.error("Erreur pendant la publication :", err);
+    setErrorMsg(
+      err?.message || "Erreur inattendue pendant la publication."
+    );
+  } finally {
+    console.log("handleSubmit terminé (finally)");
+    setLoading(false);
+  }
+};
+
 
   return (
     <main className="min-h-screen bg-black text-white px-4 py-6">

@@ -128,13 +128,14 @@ create policy "Anyone can insert profiles (demo)"
 --  (films / séries)
 -- -------------------------
 
+-- lecture : tout le monde
 drop policy if exists "Works are readable by everyone" on public.works;
 create policy "Works are readable by everyone"
   on public.works
   for select
   using (true);
 
--- Seuls les admins peuvent créer / modifier / supprimer des œuvres
+-- INSERT : n'importe quel admin peut créer une oeuvre
 drop policy if exists "Admins can insert works" on public.works;
 create policy "Admins can insert works"
   on public.works
@@ -148,12 +149,14 @@ create policy "Admins can insert works"
     )
   );
 
+-- UPDATE : seulement l'admin qui a créé l'oeuvre
 drop policy if exists "Admins can update works" on public.works;
 create policy "Admins can update works"
   on public.works
   for update
   using (
-    exists (
+    created_by = auth.uid()
+    and exists (
       select 1
       from public.profiles p
       where p.id = auth.uid()
@@ -161,7 +164,8 @@ create policy "Admins can update works"
     )
   )
   with check (
-    exists (
+    created_by = auth.uid()
+    and exists (
       select 1
       from public.profiles p
       where p.id = auth.uid()
@@ -169,18 +173,21 @@ create policy "Admins can update works"
     )
   );
 
+-- DELETE : pareil, seulement l'auteur
 drop policy if exists "Admins can delete works" on public.works;
 create policy "Admins can delete works"
   on public.works
   for delete
   using (
-    exists (
+    created_by = auth.uid()
+    and exists (
       select 1
       from public.profiles p
       where p.id = auth.uid()
         and p.role = 'admin'
     )
   );
+
 
 -- -------------------------
 --  Policies : endings
