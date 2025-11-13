@@ -27,7 +27,6 @@ export default function Nav() {
 
       setAuthed(true);
 
-      // va lire profiles.role (helper défini dans lib/auth.js)
       const userRole = await getCurrentUserRole();
       if (!mounted) return;
       setRole(userRole);
@@ -35,7 +34,6 @@ export default function Nav() {
 
     refreshAuth();
 
-    // se met à jour quand on se connecte / déconnecte
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
@@ -58,12 +56,14 @@ export default function Nav() {
     };
   }, []);
 
-  const linkClass = (href) =>
-    `px-3 py-2 text-sm font-semibold ${
-      pathname === href
-        ? "text-white"
-        : "text-neutral-300 hover:text-white"
+  const linkClass = (href) => {
+    const isActive =
+      pathname === href || pathname.startsWith(href + "/");
+
+    return `px-3 py-2 text-sm font-semibold ${
+      isActive ? "text-white" : "text-neutral-300 hover:text-white"
     }`;
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -88,13 +88,22 @@ export default function Nav() {
             <Link href="/about" className={linkClass("/about")}>
               About
             </Link>
+
             {role === "admin" && (
-              <Link
-                href="/works/publish"
-                className={linkClass("/works/publish")}
-              >
-                Publier une œuvre
-              </Link>
+              <>
+                <Link
+                  href="/works/publish"
+                  className={linkClass("/works/publish")}
+                >
+                  Publier une œuvre
+                </Link>
+                <Link
+                  href="/works/my-works"
+                  className={linkClass("/works/my-works")}
+                >
+                  Mes œuvres publiées
+                </Link>
+              </>
             )}
           </div>
         </div>
