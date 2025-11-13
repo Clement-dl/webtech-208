@@ -6,6 +6,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { supabase } from "@/lib/supabaseClient";
 import { getCurrentUserId } from "@/lib/auth";
+import VoteBox from "@/components/VoteBox";
+
 
 export default function WorkPage() {
   const { workId } = useParams(); // slug : "w1", "w2"...
@@ -292,50 +294,36 @@ export default function WorkPage() {
           )}
 
           <div className="flex flex-col gap-4">
-            {endings.map((ending) => {
-              const alreadyVoted = userVotes.has(ending.id);
+  {endings.map((ending) => (
+    <article
+      key={ending.id}
+      className="border border-neutral-700 rounded-md p-4 bg-neutral-900"
+    >
+      <h3 className="font-semibold text-lg mb-1">
+        {ending.title || "Fin sans titre"}
+      </h3>
+      <p className="text-sm text-neutral-400 mb-2">
+        Proposée par{" "}
+        <span className="font-medium">
+          {ending.author_name || "Anonyme"}
+        </span>
+        {ending.votes_count != null && (
+          <> — {ending.votes_count} vote(s)</>
+        )}
+      </p>
+      <p className="text-sm whitespace-pre-wrap mb-3">
+        {ending.content}
+      </p>
 
-              return (
-                <article
-                  key={ending.id}
-                  className="border border-neutral-700 rounded-md p-4 bg-neutral-900"
-                >
-                  <h3 className="font-semibold text-lg mb-1">
-                    {ending.title || "Fin sans titre"}
-                  </h3>
-                  <p className="text-sm text-neutral-400 mb-2">
-                    Proposée par{" "}
-                    <span className="font-medium">
-                      {ending.author_name || "Anonyme"}
-                    </span>
-                    {ending.votes_count != null && (
-                      <> — {ending.votes_count} vote(s)</>
-                    )}
-                  </p>
-                  <p className="text-sm whitespace-pre-wrap mb-3">
-                    {ending.content}
-                  </p>
+      {}
+      <VoteBox
+        endingId={ending.id}
+        votesCount={ending.votes_count}
+      />
+    </article>
+  ))}
+</div>
 
-                  <button
-                    type="button"
-                    onClick={() => handleVote(ending.id)}
-                    disabled={
-                      votingFor === ending.id || !userId || alreadyVoted
-                    }
-                    className="px-3 py-1 rounded-md bg-white text-black text-sm font-semibold disabled:opacity-60"
-                  >
-                    {alreadyVoted
-                      ? "Vous avez déjà voté pour cette fin"
-                      : votingFor === ending.id
-                      ? "Enregistrement du vote..."
-                      : !userId
-                      ? "Connectez-vous pour voter"
-                      : "Voter pour cette fin"}
-                  </button>
-                </article>
-              );
-            })}
-          </div>
         </section>
       </div>
     </main>
