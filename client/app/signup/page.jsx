@@ -33,14 +33,13 @@ export default function SignupPage() {
       return;
     }
 
-    // Succès
     router.push("/works");
   };
 
   return (
-    <main className="min-h-screen bg-black text-white flex items-center justify-center">
-      <section className="w-full max-w-md border border-neutral-800 rounded-lg px-6 py-8 bg-neutral-900">
-        <h1 className="text-2xl font-bold text-center mb-4">
+    <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] flex items-center justify-center px-4">
+      <section className="glass w-full max-w-md rounded-2xl p-8 shadow-lg animate-fade-in-up">
+        <h1 className="text-2xl font-bold text-center mb-6 gradient-text">
           Inscription
         </h1>
 
@@ -52,7 +51,7 @@ export default function SignupPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 rounded-md bg-neutral-900 border border-neutral-700 focus:outline-none focus:ring-2 focus:ring-white"
+              className="input-field w-full"
             />
           </div>
 
@@ -63,7 +62,7 @@ export default function SignupPage() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 rounded-md bg-neutral-900 border border-neutral-700 focus:outline-none focus:ring-2 focus:ring-white"
+              className="input-field w-full"
             />
             <p className="text-xs text-neutral-400 mt-1">
               Au moins 6 caractères (ex : <code>Test1234</code>).
@@ -77,7 +76,7 @@ export default function SignupPage() {
               required
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-3 py-2 rounded-md bg-neutral-900 border border-neutral-700 focus:outline-none focus:ring-2 focus:ring-white"
+              className="input-field w-full"
             />
           </div>
 
@@ -91,6 +90,7 @@ export default function SignupPage() {
                   value="user"
                   checked={role === "user"}
                   onChange={() => setRole("user")}
+                  className="accent-[var(--accent)]"
                 />
                 <span>Utilisateur</span>
               </label>
@@ -101,6 +101,7 @@ export default function SignupPage() {
                   value="admin"
                   checked={role === "admin"}
                   onChange={() => setRole("admin")}
+                  className="accent-[var(--accent)]"
                 />
                 <span>Admin</span>
               </label>
@@ -114,7 +115,7 @@ export default function SignupPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full px-4 py-2 rounded-md bg-white text-black font-semibold disabled:opacity-60"
+            className="btn-primary w-full mt-2 text-center disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {loading ? "Création du compte..." : "S'inscrire"}
           </button>
