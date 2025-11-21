@@ -19,7 +19,15 @@ export default function RequireAuth({ children }) {
   }, [router]);
 
   if (!ready) {
-    return null; // écran vide pendant la "vérification"
+    
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[var(--background)] text-[var(--foreground)]">
+        <div className="glass p-6 rounded-2xl flex flex-col items-center animate-fade-in-up shadow-lg">
+          <div className="w-12 h-12 border-4 border-[rgba(139,92,246,0.2)] border-t-[var(--accent)] rounded-full animate-spin mb-4"></div>
+          <span className="text-sm text-neutral-300">Vérification en cours...</span>
+        </div>
+      </div>
+    );
   }
 
   return children;

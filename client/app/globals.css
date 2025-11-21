@@ -59,9 +59,9 @@ body {
   body { padding-bottom: 3rem; }
 }
 
-/* ============================================
-   Background FX (glow + radial gradients)
-   ============================================ */
+/* =====================
+   Background FX
+   ===================== */
 body::before {
   content: "";
   position: fixed;
@@ -75,9 +75,9 @@ body::before {
   z-index: -1;
 }
 
-/* ============================================
-   Scrollbar (same style but cleaner)
-   ============================================ */
+/* ============
+   Scrollbar 
+   ============ */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -95,12 +95,11 @@ body::before {
   background: rgba(139, 92, 246, 0.7);
 }
 
-/* ============================================
-   Tailwind Layer — Utility Components
-   ============================================ */
+/* =================
+   Tailwind Layer
+   ================= */
 @layer components {
 
-  /* ========== Glass effects ========== */
   .glass {
     background: var(--card-bg);
     backdrop-filter: blur(14px);
@@ -115,7 +114,6 @@ body::before {
     @apply rounded-lg;
   }
 
-  /* ========== Gradient text ========== */
   .gradient-text {
     background: linear-gradient(135deg, var(--primary), var(--secondary));
     -webkit-background-clip: text;
@@ -123,7 +121,6 @@ body::before {
     background-clip: text;
   }
 
-  /* ========== Buttons ========== */
   .btn-primary {
     @apply px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 text-white;
     background: linear-gradient(135deg, var(--primary), #7c3aed);
@@ -140,7 +137,6 @@ body::before {
     @apply border border-violet-500/50 text-violet-300 hover:bg-violet-500/10;
   }
 
-  /* ========== Card ========== */
   .card {
     @apply rounded-2xl p-6 transition-all duration-300 shadow-xl;
     background: var(--card-bg);
@@ -153,7 +149,6 @@ body::before {
     box-shadow: 0 10px 30px rgba(139, 92, 246, 0.15);
   }
 
-  /* Shine effect (modernisé) */
   .card-shine {
     position: relative;
     overflow: hidden;
@@ -177,19 +172,15 @@ body::before {
     left: 120%;
   }
 
-  /* ========== Inputs ========== */
   .input-field {
     @apply w-full px-4 py-3 rounded-xl transition-all duration-300 text-white;
     @apply bg-gray-900/60 border border-gray-700/50;
     @apply focus:outline-none focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20;
   }
 
-  /* Glow = reusable shadow */
   .glow {
     box-shadow: 0 0 35px rgba(139, 92, 246, 0.35);
   }
-
-  /* ========== Layout Utils from SCSS ========== */
   .container {
     @apply max-w-[1660px] mx-auto px-4;
   }
@@ -206,9 +197,9 @@ body::before {
   .mb-2 { @apply mb-8; }
 }
 
-/* ============================================
+/* ============
    Animations
-   ============================================ */
+   ============ */
 @keyframes fadeInUp {
   from {
     opacity: 0;
