@@ -23,25 +23,28 @@ export default async function EndingPage({ params }) {
   }
 
   return (
-    <section className="max-w-3xl">
-      <h2 className="text-xl font-semibold mb-2">{work.title}</h2>
+    <section className="glass rounded-2xl p-6 shadow-lg max-w-3xl mx-auto animate-fade-in-up">
+      <h2 className="text-2xl font-bold mb-2 gradient-text">{work.title}</h2>
       <div className="text-sm text-neutral-400 mb-4">
-        Fin par {ending.author}
+        Fin par <span className="font-semibold">{ending.author}</span>
       </div>
 
-      <div className="rounded border border-yellow-600/50 bg-yellow-900/20 p-3 text-sm mb-3">
+      <div className="rounded-lg border border-yellow-600/50 bg-yellow-900/20 p-3 text-sm mb-4 shadow-sm">
         ⚠ Spoilers pour {work.title}
       </div>
 
-      <article className="prose prose-invert max-w-none">
+      <article className="prose prose-invert max-w-none mb-4">
         <p className="whitespace-pre-line">{ending.content}</p>
       </article>
 
-      {/* Vote (toujours localStorage pour l’instant) */}
-      <VoteBox endingId={ending.id} initialVotes={ending.votes} />
+      {/* Vote */}
+      <VoteBox endingId={ending.id} initialVotesCount={ending.votes} />
 
       <div className="mt-6">
-        <Link href={`/works/${workId}`} className="underline text-sm">
+        <Link
+          href={`/works/${workId}`}
+          className="text-sm text-[var(--accent)] hover:text-[var(--accent-hover)] underline transition-colors"
+        >
           ← Retour à l’œuvre
         </Link>
       </div>

@@ -11,10 +11,8 @@ export default function MyWorksPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
-
   const [works, setWorks] = useState([]);
 
-  // pour l’édition inline
   const [editingId, setEditingId] = useState(null);
   const [editFields, setEditFields] = useState({
     title: "",
@@ -31,7 +29,6 @@ export default function MyWorksPage() {
       setLoading(true);
       setErrorMsg("");
 
-      // 1) vérifier l’utilisateur
       const { data: userData, error: userError } = await supabase.auth.getUser();
       if (userError || !userData?.user) {
         if (!mounted) return;
@@ -39,18 +36,17 @@ export default function MyWorksPage() {
         router.push("/login");
         return;
       }
-      const userId = userData.user.id;
 
-      // 2) vérifier le rôle admin
+      const userId = userData.user.id;
       const role = await getCurrentUserRole();
       if (!mounted) return;
+
       if (role !== "admin") {
         setErrorMsg("Accès réservé aux administrateurs.");
         router.push("/");
         return;
       }
 
-      // 3) charger les œuvres créées par cet utilisateur
       const { data, error } = await supabase
         .from("works")
         .select("id, slug, title, year, kind, genre, description, poster_path, created_at")
@@ -70,13 +66,11 @@ export default function MyWorksPage() {
     }
 
     load();
-
     return () => {
       mounted = false;
     };
   }, [router]);
 
-  // Quand on clique sur "Modifier"
   const startEdit = (work) => {
     setEditingId(work.id);
     setEditFields({
@@ -88,16 +82,10 @@ export default function MyWorksPage() {
     });
   };
 
-  const cancelEdit = () => {
-    setEditingId(null);
-  };
+  const cancelEdit = () => setEditingId(null);
 
-  const handleFieldChange = (field, value) => {
-    setEditFields((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
+  const handleFieldChange = (field, value) =>
+    setEditFields((prev) => ({ ...prev, [field]: value }));
 
   const handleUpdate = async (workId) => {
     setErrorMsg("");
@@ -123,10 +111,7 @@ export default function MyWorksPage() {
       return;
     }
 
-    // remplacer l’élément dans le state
-    setWorks((prev) =>
-      prev.map((w) => (w.id === workId ? data : w))
-    );
+    setWorks((prev) => prev.map((w) => (w.id === workId ? data : w)));
     setEditingId(null);
   };
 
@@ -135,11 +120,7 @@ export default function MyWorksPage() {
     const ok = window.confirm("Supprimer définitivement cette œuvre ?");
     if (!ok) return;
 
-    const { error } = await supabase
-      .from("works")
-      .delete()
-      .eq("id", workId);
-
+    const { error } = await supabase.from("works").delete().eq("id", workId);
     if (error) {
       console.error("Erreur delete work:", error);
       setErrorMsg("Impossible de supprimer l'œuvre.");
@@ -150,74 +131,56 @@ export default function MyWorksPage() {
   };
 
   return (
-    <main className="min-h-screen bg-black text-white px-4 py-6">
-      <section className="max-w-5xl mx-auto">
-        <h1 className="text-2xl font-bold mb-4">Mes œuvres publiées</h1>
+    <main className="min-h-screen bg-background text-foreground section">
+      <section className="container py-8">
+        <h1 className="text-4xl font-bold mb-8 gradient-text">Mes œuvres publiées</h1>
 
-        {errorMsg && (
-          <p className="mb-4 text-sm text-red-400">{errorMsg}</p>
-        )}
-
-        {loading && <p>Chargement…</p>}
-
+        {errorMsg && <p className="mb-4 text-sm text-red-400">{errorMsg}</p>}
+        {loading && <p className="text-foreground/70">Chargement…</p>}
         {!loading && works.length === 0 && (
-          <p>Vous n&apos;avez encore publié aucune œuvre.</p>
+          <p className="text-foreground/60">Vous n&apos;avez encore publié aucune œuvre.</p>
         )}
 
         <div className="flex flex-col gap-6 mt-4">
           {works.map((work) => {
-            const posterSrc =
-              work.poster_path && work.poster_path.trim() !== ""
-                ? work.poster_path
-                : "/posters/placeholder.svg";
-
+            const posterSrc = work.poster_path?.trim() || "/posters/placeholder.svg";
             const isEditing = editingId === work.id;
 
             return (
               <article
                 key={work.id}
-                className="flex flex-col md:flex-row gap-4 border border-neutral-800 rounded-lg p-4 bg-neutral-900"
+                className="card card-shine flex flex-col md:flex-row gap-4"
               >
-                {/* Affiche */}
+                {/* Poster */}
                 <div className="w-full md:w-1/4">
-                  <div className="relative w-full aspect-[2/3] bg-neutral-800 rounded-md overflow-hidden">
-                    <Image
-                      src={posterSrc}
-                      alt={work.title}
-                      fill
-                      style={{ objectFit: "cover" }}
-                    />
+                  <div className="relative w-full aspect-[2/3] rounded-xl overflow-hidden bg-white/5">
+                    <Image src={posterSrc} alt={work.title} fill style={{ objectFit: "cover" }} />
                   </div>
                 </div>
 
-                {/* Contenu + actions */}
+                {/* Contenu */}
                 <div className="flex-1 flex flex-col gap-3">
                   {isEditing ? (
                     <>
                       <input
                         type="text"
                         value={editFields.title}
-                        onChange={(e) =>
-                          handleFieldChange("title", e.target.value)
-                        }
-                        className="w-full px-3 py-2 rounded-md bg-neutral-900 border border-neutral-700 text-sm"
+                        onChange={(e) => handleFieldChange("title", e.target.value)}
+                        className="input-field"
+                        placeholder="Titre"
                       />
                       <div className="flex flex-wrap gap-3">
                         <input
                           type="number"
                           value={editFields.year}
-                          onChange={(e) =>
-                            handleFieldChange("year", e.target.value)
-                          }
-                          className="px-3 py-2 rounded-md bg-neutral-900 border border-neutral-700 text-sm w-24"
+                          onChange={(e) => handleFieldChange("year", e.target.value)}
+                          className="input-field w-24"
                           placeholder="Année"
                         />
                         <select
                           value={editFields.kind}
-                          onChange={(e) =>
-                            handleFieldChange("kind", e.target.value)
-                          }
-                          className="px-3 py-2 rounded-md bg-neutral-900 border border-neutral-700 text-sm"
+                          onChange={(e) => handleFieldChange("kind", e.target.value)}
+                          className="input-field"
                         >
                           <option value="film">Film</option>
                           <option value="serie">Série</option>
@@ -225,19 +188,15 @@ export default function MyWorksPage() {
                         <input
                           type="text"
                           value={editFields.genre}
-                          onChange={(e) =>
-                            handleFieldChange("genre", e.target.value)
-                          }
-                          className="flex-1 px-3 py-2 rounded-md bg-neutral-900 border border-neutral-700 text-sm"
+                          onChange={(e) => handleFieldChange("genre", e.target.value)}
+                          className="input-field flex-1"
                           placeholder="Genre"
                         />
                       </div>
                       <textarea
                         value={editFields.description}
-                        onChange={(e) =>
-                          handleFieldChange("description", e.target.value)
-                        }
-                        className="w-full min-h-[80px] px-3 py-2 rounded-md bg-neutral-900 border border-neutral-700 text-sm"
+                        onChange={(e) => handleFieldChange("description", e.target.value)}
+                        className="input-field min-h-[80px]"
                         placeholder="Description"
                       />
 
@@ -245,14 +204,14 @@ export default function MyWorksPage() {
                         <button
                           type="button"
                           onClick={() => handleUpdate(work.id)}
-                          className="px-4 py-2 rounded-md bg-white text-black text-sm font-semibold"
+                          className="btn-primary"
                         >
                           Enregistrer
                         </button>
                         <button
                           type="button"
                           onClick={cancelEdit}
-                          className="px-4 py-2 rounded-md border border-neutral-500 text-sm"
+                          className="btn-secondary"
                         >
                           Annuler
                         </button>
@@ -260,27 +219,22 @@ export default function MyWorksPage() {
                     </>
                   ) : (
                     <>
-                      <h2 className="text-lg font-semibold">
-                        {work.title}
-                      </h2>
-                      <p className="text-sm text-neutral-400">
-                        {work.year ?? "—"} ·{" "}
-                        {work.kind === "film" ? "movie" : "serie"} ·{" "}
+                      <h2 className="text-lg font-semibold">{work.title}</h2>
+                      <p className="text-sm text-foreground/60">
+                        {work.year ?? "—"} · {work.kind === "film" ? "movie" : "serie"} ·{" "}
                         {work.genre ?? "—"}
                       </p>
                       {work.description && (
-                        <p className="text-sm text-neutral-200">
-                          {work.description}
-                        </p>
+                        <p className="text-sm text-foreground/60">{work.description}</p>
                       )}
                     </>
                   )}
 
-                  {/* Liens & boutons */}
+                  {/* Actions */}
                   <div className="flex flex-wrap gap-3 mt-auto pt-2">
                     <Link
                       href={`/works/${work.slug}`}
-                      className="px-3 py-2 rounded-md border border-white text-sm font-semibold"
+                      className="btn-secondary flex-1 text-center"
                     >
                       Voir la fiche
                     </Link>
@@ -289,7 +243,7 @@ export default function MyWorksPage() {
                       <button
                         type="button"
                         onClick={() => startEdit(work)}
-                        className="px-3 py-2 rounded-md bg-white text-black text-sm font-semibold"
+                        className="btn-primary flex-1 text-center"
                       >
                         Modifier
                       </button>
@@ -298,7 +252,7 @@ export default function MyWorksPage() {
                     <button
                       type="button"
                       onClick={() => handleDelete(work.id)}
-                      className="px-3 py-2 rounded-md border border-red-500 text-red-400 text-sm font-semibold"
+                      className="btn-secondary border-red-500 text-red-400 flex-1 text-center"
                     >
                       Supprimer
                     </button>

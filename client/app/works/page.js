@@ -13,11 +13,10 @@ export default function WorksPage() {
   const [works, setWorks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
-  const [genreFilter, setGenreFilter] = useState(null); // store normalized genre
-  const [kindFilter, setKindFilter] = useState("all"); // 'all' | 'film' | 'serie'
+  const [genreFilter, setGenreFilter] = useState(null);
+  const [kindFilter, setKindFilter] = useState("all");
   const [search, setSearch] = useState("");
 
-  // Load works once
   useEffect(() => {
     async function loadWorks() {
       setLoading(true);
@@ -53,17 +52,15 @@ export default function WorksPage() {
     loadWorks();
   }, []);
 
-  // Build genre list dynamically from current works
   const genres = useMemo(() => {
     const set = new Set();
     for (const w of works) {
       const g = norm(w.genre);
       if (g) set.add(g);
     }
-    return Array.from(set).sort(); // array of normalized genres
+    return Array.from(set).sort();
   }, [works]);
 
-  // Apply filters
   const filteredWorks = works
     .filter((w) => (genreFilter ? norm(w.genre) === genreFilter : true))
     .filter((w) => (kindFilter === "all" ? true : w.kind === kindFilter))
@@ -74,67 +71,45 @@ export default function WorksPage() {
     );
 
   return (
-    <main className="min-h-screen bg-black text-white">
-      <section className="max-w-5xl mx-auto px-4 py-6">
-        <h1 className="text-3xl font-bold mb-6">Œuvres</h1>
+    <main className="min-h-screen bg-background text-foreground section">
+      <section className="container py-8">
+        <h1 className="text-4xl font-bold mb-8 gradient-text">Œuvres</h1>
 
         {/* Filtres */}
-        <div className="flex flex-col gap-4 mb-6">
-          {/* Genres dynamiques */}
+        <div className="flex flex-col gap-4 mb-8">
+          {/* Genres */}
           <div className="flex flex-wrap gap-3">
             <button
-              className={`px-4 py-2 rounded-full border ${
-                !genreFilter ? "bg-white text-black" : "bg-transparent"
-              }`}
+              className={`btn-secondary ${!genreFilter ? "bg-white/10 text-white border-white/50" : ""}`}
               onClick={() => setGenreFilter(null)}
             >
               Tous les genres
             </button>
-
             {genres.map((g) => (
               <button
                 key={g}
-                className={`px-4 py-2 rounded-full border capitalize ${
-                  genreFilter === g ? "bg-white text-black" : "bg-transparent"
-                }`}
-                onClick={() =>
-                  setGenreFilter(genreFilter === g ? null : g)
-                }
+                className={`btn-secondary capitalize ${genreFilter === g ? "bg-white/10 text-white border-white/50" : ""}`}
+                onClick={() => setGenreFilter(genreFilter === g ? null : g)}
               >
                 {titleCase(g)}
               </button>
             ))}
           </div>
 
-          {/* Types (film / série) */}
+          {/* Types */}
           <div className="flex flex-wrap gap-3">
-            <button
-              className={`px-4 py-2 rounded-full border ${
-                kindFilter === "all" ? "bg-white text-black" : "bg-transparent"
-              }`}
-              onClick={() => setKindFilter("all")}
-            >
-              Tous les types
-            </button>
-            <button
-              className={`px-4 py-2 rounded-full border ${
-                kindFilter === "film" ? "bg-white text-black" : "bg-transparent"
-              }`}
-              onClick={() => setKindFilter("film")}
-            >
-              Films
-            </button>
-            <button
-              className={`px-4 py-2 rounded-full border ${
-                kindFilter === "serie" ? "bg-white text-black" : "bg-transparent"
-              }`}
-              onClick={() => setKindFilter("serie")}
-            >
-              Séries
-            </button>
+            {["all", "film", "serie"].map((type) => (
+              <button
+                key={type}
+                className={`btn-secondary ${kindFilter === type ? "bg-white/10 text-white border-white/50" : ""}`}
+                onClick={() => setKindFilter(type)}
+              >
+                {type === "all" ? "Tous les types" : type === "film" ? "Films" : "Séries"}
+              </button>
+            ))}
           </div>
 
-          {/* Barre de recherche */}
+          {/* Search */}
           <form
             className="flex gap-3 max-w-xl"
             onSubmit={(e) => e.preventDefault()}
@@ -144,39 +119,32 @@ export default function WorksPage() {
               placeholder="Rechercher un film ou une série..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="flex-1 px-4 py-2 rounded-md bg-neutral-900 border border-neutral-700 focus:outline-none focus:ring-2 focus:ring-white"
+              className="input-field"
             />
-            <button
-              type="submit"
-              className="px-4 py-2 rounded-md bg-white text-black font-semibold"
-            >
+            <button type="submit" className="btn-primary">
               Chercher
             </button>
           </form>
         </div>
 
-        {loading && <p>Chargement des œuvres...</p>}
+        {loading && <p className="text-foreground/70">Chargement des œuvres...</p>}
         {errorMsg && <p className="text-red-400 mb-4">{errorMsg}</p>}
-
         {!loading && !errorMsg && filteredWorks.length === 0 && (
-          <p>Aucune œuvre.</p>
+          <p className="text-foreground/70">Aucune œuvre trouvée.</p>
         )}
 
         {/* Grille des œuvres */}
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filteredWorks.map((work) => {
             const endingsCount = work.endings?.length ?? 0;
-            const posterSrc =
-              work.poster_path && work.poster_path.trim() !== ""
-                ? work.poster_path
-                : "/posters/placeholder.svg";
+            const posterSrc = work.poster_path?.trim() || "/posters/placeholder.svg";
 
             return (
               <article
                 key={work.id}
-                className="bg-neutral-900 rounded-lg overflow-hidden flex flex-col w-full max-w-xs mx-auto"
+                className="card card-shine flex flex-col w-full max-w-xs mx-auto"
               >
-                <div className="relative w-full aspect-[2/3] bg-neutral-800">
+                <div className="relative w-full aspect-[2/3] rounded-xl overflow-hidden bg-white/5">
                   <Image
                     src={posterSrc}
                     alt={work.title}
@@ -186,27 +154,23 @@ export default function WorksPage() {
                   />
                 </div>
 
-                <div className="p-4 flex flex-col gap-2 flex-1">
+                <div className="mt-4 flex flex-col gap-2 flex-1">
                   <h2 className="text-lg font-semibold">{work.title}</h2>
-                  <p className="text-sm text-neutral-400">
-                    {work.year ?? "—"} ·{" "}
-                    {work.kind === "film" ? "movie" : "serie"} ·{" "}
-                    {work.genre ?? "—"}
+                  <p className="text-sm text-foreground/60">
+                    {work.year ?? "—"} · {work.kind === "film" ? "movie" : "serie"} · {work.genre ?? "—"}
                   </p>
-                  <p className="text-sm text-neutral-400">
-                    {endingsCount} fin(s) proposée(s)
-                  </p>
+                  <p className="text-sm text-foreground/60">{endingsCount} fin(s) proposée(s)</p>
 
                   <div className="mt-auto flex gap-3 pt-4">
                     <Link
                       href={`/works/${work.slug}`}
-                      className="flex-1 text-center px-3 py-2 rounded-md bg-white text-black text-sm font-semibold"
+                      className="btn-primary flex-1 text-center"
                     >
                       Voir les fins
                     </Link>
                     <Link
                       href={`/works/${work.slug}/submit`}
-                      className="flex-1 text-center px-3 py-2 rounded-md border border-white text-sm font-semibold"
+                      className="btn-secondary flex-1 text-center"
                     >
                       Proposer une fin
                     </Link>
