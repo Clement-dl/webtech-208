@@ -26,7 +26,6 @@ export default function Nav() {
       }
 
       setAuthed(true);
-
       const userRole = await getCurrentUserRole();
       if (!mounted) return;
       setRole(userRole);
@@ -57,11 +56,12 @@ export default function Nav() {
   }, []);
 
   const linkClass = (href) => {
-    const isActive =
-      pathname === href || pathname.startsWith(href + "/");
+    const isActive = pathname === href || pathname.startsWith(href + "/");
 
-    return `px-3 py-2 text-sm font-semibold ${
-      isActive ? "text-white" : "text-neutral-300 hover:text-white"
+    return `px-3 py-2 text-sm font-semibold transition-all duration-300 ${
+      isActive
+        ? "text-white bg-[rgba(139,92,246,0.2)] rounded-lg"
+        : "text-neutral-300 hover:text-white hover:bg-[rgba(139,92,246,0.1)] rounded-lg"
     }`;
   };
 
@@ -71,22 +71,23 @@ export default function Nav() {
   };
 
   return (
-    <nav className="w-full border-b border-neutral-800 bg-black text-white">
-      <div className="max-w-5xl mx-auto flex items-center justify-between px-4 py-3">
-        {/* Logo + liens de gauche */}
-        <div className="flex items-center gap-6">
-          <Link href="/" className="text-xl font-bold">
+    <nav className="w-full glass shadow-md sticky top-0 z-50 backdrop-blur-lg border-b border-[rgba(139,92,246,0.1)]">
+      <div className="max-w-6xl mx-auto flex items-center justify-between px-6 py-3 md:px-4 sm:px-2">
+        {/* Logo + liens */}
+        <div className="flex items-center gap-8 md:gap-4 sm:gap-2 flex-wrap">
+          <Link href="/" className="text-2xl font-extrabold gradient-text">
             Alt-Endings
           </Link>
-          <div className="flex items-center gap-4">
+
+          <div className="flex items-center gap-4 flex-wrap">
             <Link href="/" className={linkClass("/")}>
-              Alt-Endings
+              Accueil
             </Link>
             <Link href="/works" className={linkClass("/works")}>
               Œuvres
             </Link>
             <Link href="/about" className={linkClass("/about")}>
-              About
+              À propos
             </Link>
 
             {role === "admin" && (
@@ -95,13 +96,13 @@ export default function Nav() {
                   href="/works/publish"
                   className={linkClass("/works/publish")}
                 >
-                  Publier une œuvre
+                  Publier
                 </Link>
                 <Link
                   href="/works/my-works"
                   className={linkClass("/works/my-works")}
                 >
-                  Mes œuvres publiées
+                  Mes œuvres
                 </Link>
               </>
             )}
@@ -109,12 +110,12 @@ export default function Nav() {
         </div>
 
         {/* Droite : login / logout */}
-        <div className="flex items-center gap-4 text-sm">
+        <div className="flex items-center gap-3 md:gap-2 sm:gap-1 flex-wrap text-sm">
           {authed ? (
             <button
               type="button"
               onClick={handleLogout}
-              className="px-3 py-1 rounded-md border border-white hover:bg-white hover:text-black font-semibold"
+              className="btn-secondary glow transition-all duration-300"
             >
               Se déconnecter
             </button>
@@ -122,13 +123,13 @@ export default function Nav() {
             <>
               <Link
                 href="/login"
-                className="px-3 py-1 rounded-md border border-white hover:bg-white hover:text-black font-semibold"
+                className="btn-primary glow transition-all duration-300"
               >
                 Se connecter
               </Link>
               <Link
                 href="/signup"
-                className="px-3 py-1 rounded-md border border-neutral-500 text-neutral-300 hover:border-white hover:text-white font-semibold"
+                className="btn-secondary glow transition-all duration-300"
               >
                 Inscription
               </Link>
