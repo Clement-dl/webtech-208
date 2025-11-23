@@ -13,20 +13,19 @@ export default function HomePage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] flex flex-col justify-start">
-      
-      {/* Section Alt-Endings */}
-      <section className="container glass p-10 md:p-8 sm:p-6 rounded-3xl shadow-lg flex flex-col items-start animate-fade-in-up mt-10">
-        <h1 className="text-5xl font-extrabold gradient-text mb-4 md:text-4xl sm:text-3xl">
+    <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] flex flex-col items-center">
+    
+      <section className="glass p-8 md:p-6 sm:p-4 rounded-3xl shadow-lg flex flex-col items-center text-center animate-fade-in-up mt-16 max-w-3xl">
+
+        <h1 className="text-4xl md:text-3xl sm:text-2xl font-extrabold gradient-text mb-4">
           Alt-Endings
         </h1>
 
-        <p className="text-lg text-neutral-300 mb-8 max-w-2xl md:text-base sm:text-sm">
-          Réécris la fin. Vote pour la meilleure. Choisis une œuvre culte,
-          propose ta fin alternative et découvre celles des autres.
+        <p className="text-md md:text-sm sm:text-sm text-neutral-300 mb-6">
+          Réécris la fin. Vote pour la meilleure. Choisis une œuvre culte, propose ta fin alternative et découvre celles des autres.
         </p>
 
-        <div className="flex gap-4 flex-wrap mb-10">
+        <div className="flex gap-4 flex-wrap justify-center mb-4">
           <Link href="/works" className="btn-primary">
             Voir les œuvres
           </Link>
@@ -50,8 +49,8 @@ export default function HomePage() {
           Merci de marquer clairement vos spoilers et de rester respectueux.
         </p>
       </section>
-      <Carrousel />
 
+      <Carrousel />
     </main>
   );
 }
