@@ -4,6 +4,10 @@ import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
+import { getCurrentUserId } from "@/lib/auth";
+
+
+
 
 // helpers
 const norm = (s) => (s ? s.trim().toLowerCase() : "");
@@ -16,6 +20,13 @@ export default function WorksPage() {
   const [genreFilter, setGenreFilter] = useState(null);
   const [kindFilter, setKindFilter] = useState("all");
   const [search, setSearch] = useState("");
+
+  const [userId, setUserId] = useState(null);
+  useEffect(() => {
+  getCurrentUserId().then(setUserId);
+}, []);
+
+
 
   useEffect(() => {
     async function loadWorks() {
@@ -168,12 +179,23 @@ export default function WorksPage() {
                     >
                       Voir les fins
                     </Link>
-                    <Link
-                      href={`/works/${work.slug}/submit`}
-                      className="btn-secondary flex-1 text-center"
-                    >
-                      Proposer une fin
-                    </Link>
+                    {userId ? (
+    <Link
+      href={`/works/${work.slug}/submit`}
+      className="btn-secondary flex-1 text-center"
+    >
+      Proposer une fin
+    </Link>
+  ) : (
+    <button
+      type="button"
+      disabled
+      className="btn-secondary flex-1 text-center bg-gray-800 border-gray-700 text-neutral-400 cursor-not-allowed disabled:opacity-60"
+    >
+      Proposer une fin
+    </button>
+  )}
+
                   </div>
                 </div>
               </article>

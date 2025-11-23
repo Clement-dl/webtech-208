@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { supabase } from "../../../../lib/supabaseClient";
+import { supabase } from "@/lib/supabaseClient";
+import { getCurrentUserId } from "@/lib/auth";
 
 export default function SubmitEndingPage() {
   const { workId } = useParams();
@@ -47,40 +48,52 @@ export default function SubmitEndingPage() {
   }, [workId]);
 
   async function handleSubmit(e) {
-    e.preventDefault();
-    if (!work) return;
+  e.preventDefault();
+  if (!work) return;
 
-    setSubmitting(true);
-    setErrorMsg("");
-    setSuccessMsg("");
+  setSubmitting(true);
+  setErrorMsg("");
+  setSuccessMsg("");
 
-    try {
-      const { error } = await supabase.from("endings").insert({
-        work_id: work.id,
-        title: title || null,
-        author_name: authorName || "Anonyme",
-        content,
-      });
+  try {
+    // 1) Récupérer l'id de l'utilisateur connecté
+    const userId = await getCurrentUserId();
 
-      if (error) {
-        console.error("Erreur insert Supabase (ending):", error);
-        setErrorMsg("Impossible d'enregistrer la fin (erreur Supabase).");
-      } else {
-        setSuccessMsg("Fin enregistrée avec succès !");
-        setTitle("");
-        setAuthorName("");
-        setContent("");
-        router.push(`/works/${work.slug}`);
-      }
-    } catch (err) {
-      console.error(err);
-      setErrorMsg(
-        "Une erreur inattendue est survenue lors de l'enregistrement."
-      );
-    } finally {
+    if (!userId) {
+      setErrorMsg("Vous devez être connecté pour publier une fin.");
       setSubmitting(false);
+      return;
     }
+
+    // 2) Insérer la fin avec created_by = userId
+    const { error } = await supabase.from("endings").insert({
+      work_id: work.id,
+      title: title || null,
+      author_name: authorName || "Anonyme",
+      content,
+      created_by: userId,
+    });
+
+    if (error) {
+      console.error("Erreur insert Supabase (ending):", error);
+      setErrorMsg("Impossible d'enregistrer la fin (erreur Supabase).");
+    } else {
+      setSuccessMsg("Fin enregistrée avec succès !");
+      setTitle("");
+      setAuthorName("");
+      setContent("");
+      router.push(`/works/${work.slug}`);
+    }
+  } catch (err) {
+    console.error(err);
+    setErrorMsg(
+      "Une erreur inattendue est survenue lors de l'enregistrement."
+    );
+  } finally {
+    setSubmitting(false);
   }
+}
+
 
   if (loadingWork) {
     return (

@@ -1,6 +1,16 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { getCurrentUserId } from "@/lib/auth";
 
 export default function HomePage() {
+  const [userId, setUserId] = useState(null);
+
+  useEffect(() => {
+    getCurrentUserId().then(setUserId);
+  }, []);
+
   return (
     <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] flex flex-col justify-center">
       <section className="container glass p-10 md:p-8 sm:p-6 rounded-3xl shadow-lg flex flex-col items-start animate-fade-in-up">
@@ -14,19 +24,23 @@ export default function HomePage() {
         </p>
 
         <div className="flex gap-4 flex-wrap mb-10">
-          <Link
-            href="/works"
-            className="btn-primary"
-          >
+          <Link href="/works" className="btn-primary">
             Voir les œuvres
           </Link>
 
-          <Link
-            href="/works/w1/submit"
-            className="btn-secondary"
-          >
-            Proposer une fin
-          </Link>
+          {userId ? (
+            <Link href="/works" className="btn-secondary">
+                Proposer une fin
+            </Link>
+          ) : (
+            <button
+              type="button"
+              disabled
+              className="btn-secondary bg-gray-800 border-gray-700 text-neutral-400 cursor-not-allowed disabled:opacity-60"
+            >
+              Proposer une fin
+            </button>
+          )}
         </div>
 
         <p className="text-xs text-neutral-400">

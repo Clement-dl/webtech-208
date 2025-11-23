@@ -222,14 +222,26 @@ export default function WorkPage() {
             {work.genre ?? "—"}
           </p>
           {work.description && (
-            <p className="text-sm text-neutral-200 mt-4">{work.description}</p>
-          )}
-          <Link
-            href={`/works/${work.slug}/submit`}
-            className="btn-primary mt-6 w-full text-center"
-          >
-            Proposer une fin
-          </Link>
+  <p className="text-sm text-neutral-200 mt-4">{work.description}</p>
+)}
+
+{userId ? (
+  <Link
+    href={`/works/${work.slug}/submit`}
+    className="btn-primary mt-6 w-full text-center"
+  >
+    Proposer une fin
+  </Link>
+) : (
+  <button
+    type="button"
+    disabled
+    className="btn-primary mt-6 w-full text-center bg-gray-800 border-gray-700 text-neutral-400 cursor-not-allowed hover:bg-gray-800 disabled:opacity-60"
+  >
+    Connectez-vous pour publier une fin
+  </button>
+)}
+
         </div>
 
         {/* Liste des fins */}
