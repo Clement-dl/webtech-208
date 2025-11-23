@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { signup } from "@/lib/auth";
+import { signup, login } from "@/lib/auth";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -33,7 +33,25 @@ export default function SignupPage() {
       return;
     }
 
+    // 🔹 On force une vraie connexion juste après l'inscription
+    const { user: loggedInUser, error: loginError } = await login({
+      email,
+      password,
+    });
+
+    if (loginError || !loggedInUser) {
+      console.error(loginError);
+      setErrorMsg(
+        loginError?.message ??
+          "Compte créé, mais erreur pendant la connexion automatique."
+      );
+      setLoading(false);
+      return;
+    }
+
+    setLoading(false);
     router.push("/works");
+    router.refresh(); 
   };
 
   return (

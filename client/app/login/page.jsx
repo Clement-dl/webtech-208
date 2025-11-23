@@ -26,7 +26,9 @@ export default function LoginPage() {
       return;
     }
 
+    setLoading(false);
     router.push("/works");
+    router.refresh(); 
   };
 
   return (
