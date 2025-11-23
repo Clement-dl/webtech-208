@@ -1,101 +1,216 @@
-# webtech-208 — Alt-Endings
+#  Alt-Endings  
+### *Réécris la fin. Vote pour la meilleure.*
 
-Projet Next.js (App Router) : proposer et voter des fins alternatives pour des œuvres.
+---
 
-## Sommaire
-- [Prérequis](#prérequis)
-- [Installation & Lancement](#installation--lancement)
-- [Instructions d’utilisation](#instructions-dutilisation)
-- [Fonctionnalités](#fonctionnalités)
-- [Tech & Structure](#tech--structure)
-- [Contributeurs](#contributeurs)
+#  1. Pitch du projet
 
-## Prérequis
-- Node.js v22+
-- npm
-- Chrome/Firefox
+Alt-Endings est une plateforme où les utilisateurs peuvent explorer des œuvres cultes, proposer des fins alternatives, voter pour celles des autres, et gérer leurs propres contenus dans un espace personnel sécurisé.
 
-## Installation & Lancement
+---
 
-1. Cloner ce dépôt :
+#  2. Stack Technique
 
-   ```bash
-   git clone https://github.com/Clement-dl/webtech-208.git
-   cd webtech-208
+- **Next.js 14 (App Router)** — Server Components, Client Components, Layouts  
+- **Supabase** — Auth, Base de données PostgreSQL, Storage, RLS  
+- **Tailwind CSS** — Design responsive et moderne  
+- **OMDb API** — Récupération d'informations officielles (durée, note IMDb)
 
-2. Installer les dépendances :
-    ```bash
-    npm install
+---
 
-## Instructions d’utilisation
+#  3. Captures d’écran du projet
 
-1. Lancer l’application en mode normal :
-   ```bash
-   npm start
+##  Page d’accueil  
+![Page d’accueil](docs/works-grid.png)
 
-2. Lancer l’application en mode développement :
-    ```bash
-    npm run dev
+##  Page d'une œuvre (infos + API OMDb)  
+![Détail œuvre](docs/screenshots/détail.png)
 
-3. Ouvrir un navigateur et accéder à :
+##  Publication d'une fin  
+![Publier fin](docs/screenshots/publication.png)
 
-- Page d’accueil : http://localhost:3000/
-- Œuvres (grille + filtres) : http://localhost:3000/works
-- À propos : http://localhost:3000/about
-- Connexion / Inscription (mock) : http://localhost:3000/login · http://localhost:3000/signup
+##  Page Mes fins  
+![Mes fins](docs/screenshots/mesfins.png)
 
-## Fonctionnalités
+##  Votes  
+![Votes](docs/screenshots/votes.png)
 
-### 1) Connexion / Inscription *(pas encore Supabase)*
-- **Chemins** : `/login`, `/signup`
-- **Description** : formulaires d’auth simulée (pas de supabase pour l'instant).
-- **Capture** : ![Login](docs/screenshots/01-login.jpg)
+##  Page Mes œuvres (admin)  
+![Mes œuvres](docs/screenshots/mesoeuvres.png)
 
-### 2) Page “Œuvres” — Grille + posters
-- **Chemin** : `/works`
-- **Description** : affichage en **3 colonnes** avec posters **locaux** et compteur de fins.
-- **Capture** : ![Grille des œuvres](docs/screenshots/03-works-grid.jpg)
+---
 
-### 3) Filtre par **genre**
-- **Chemin** : `/works?genre=<genre>`
-- **Description** : pills sous le titre “Œuvres” pour filtrer par genre.
-- **Capture** : ![Filtre par genre](docs/screenshots/04-works-filter-genre.jpg)
+#  4. Fonctionnalités principales
 
-### 4) Barre de **recherche**
-- **Chemin** : `/works?q=<terme>` (cumulable avec `genre`)
-- **Description** : recherche par titre, combinable avec le filtre de genre.
-- **Capture** : ![Recherche](docs/screenshots/05-works-search.jpg)
-
-### 5) Détail d’une œuvre & liste des fins
-- **Chemin** : `/works/[workId]`
-- **Description** : affiche les infos de l’œuvre et les fins proposées (triées par votes).
-- **Capture** : ![Détail œuvre](docs/screenshots/06-work-detail.jpg)
-
-### 6) Lecture d’une fin + **vote** (anti multi-vote local)
-- **Chemin** : `/works/[workId]/endings/[endingId]`
-- **Description** : lecture complète d’une fin et bouton **+1 vote** (verrou via `localStorage`).
-- **Capture** : ![Lecture fin](docs/screenshots/07-ending-read.jpg)
-
-### 7) Proposer une fin
-- **Chemin** : `/works/[workId]/submit`
-- **Description** : formulaire pour soumettre une nouvelle fin (mock).
-- **Capture** : ![Soumission de fin](docs/screenshots/08-submit-ending.jpg)
+###  Authentification
+- Inscription / Connexion / Déconnexion  
+- Comptes **user** et **admin**  
+- Interface mise à jour automatiquement selon l’état de session  
+- Protection des pages (Mes fins, Mes œuvres, Publier une oeuvre)
 
 
-## Tech & Structure
+###  Gestion des œuvres
+- Liste filtrée par genre  
+- Page détaillée  
+- Ajout / modification / suppression (admin uniquement)  
+- Upload d’affiches via Supabase Storage
 
-### Stack
-- **Framework** : Next.js 15 (App Router)
-- **Langage** : JavaScript (ES202x)
-- **UI** : Tailwind CSS v3 + PostCSS + Autoprefixer
-- **Auth (mock)** : logique locale (`lib/auth.js`) — *pas encore Supabase*
-- **Données mock** : `lib/fakeDb.js` (WORKS, ENDINGS)
-- **Images** : `next/image` + posters locaux dans `public/posters/`
+###  Fins alternatives
+- Ajouter une fin  
+- Modifier ses propres fins  
+- Supprimer avec confirmation  
+- Page dédiée : **Mes fins**
+
+###  Votes
+- Un vote maximum par fin  
+- Mise à jour dynamique  
+- Protection via RLS (un user ne peut voter que pour lui-même, un utilisateur ne peut créer/voir/modifier des votes qui lui appartiennent, et pas ceux des autres.)
+
+###  Sécurité (RLS)
+- Chaque utilisateur ne modifie que ses données  
+- Admin ne gère que ses propres œuvres  
+- Fins modifiables uniquement par leur auteur  
+- Votes protégés  
+- Bucket *posters* configuré (lecture publique / upload authentifié)
+
+###  Stockage
+- Upload et affichage des affiches  
+- Accessible publiquement
+
+---
+
+#  5. Installation en local
+
+  1. Cloner le projet
+bash
+git clone <url-du-repo>
+cd webtech-208-main
+
+ 2. Installer les dépendances
+bash
+Copier le code
+npm install
+
+ 3. Ajouter les variables d’environnement
+Créer client/.env.local :
+
+env
+Copier le code
+NEXT_PUBLIC_SUPABASE_URL="https://jqfetarzqqberxrmskmy.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxZmV0YXJ6cXFiZXJ4cm1za215Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2Nzg4ODUsImV4cCI6MjA3ODI1NDg4NX0.uEtidyu8qbq0pcxlyQQf2tV4AWzvsWhNmufvCfuMjbU"
+NEXT_PUBLIC_OMDB_API_KEY="b7b6228e"
+
+ 4. Lancer l'application
+bash
+Copier le code
+npm run dev
+Accès via :
+ http://localhost:3000
+
+ 5. Guide utilisateur
+ Connexion
+Inscription
+
+Connexion automatique après signup
+
+Déconnexion
+
+Redirection automatique en fonction des droits
+
+ Œuvres
+Consultation des œuvres
+
+Informations OMDb
+
+Filtrage par genre
+
+ Proposer une fin
+Accessible aux utilisateurs connectés
+
+Le champ created_by est automatiquement rempli
+
+Interface sécurisée via RLS
+
+ Mes fins
+Voir toutes ses fins
+
+Modifier / supprimer
+
+Interface simple et fluide
+
+ Votes
+Limitation automatique
+
+Mise à jour dynamique du compteur
+
+ Espace admin
+Ajouter une œuvre
+
+Modifier / supprimer ses œuvres
+
+Upload d’affiches via Storage
+
+ 6. Sécurité (RLS)
+ profiles
+Lecture et modification par le propriétaire uniquement
+
+ works
+CRUD uniquement pour l’admin associé
+
+ endings
+Lecture publique
+
+Modification/suppression uniquement par l’auteur
+
+ votes
+Un user ne peut voter que pour lui-même
+
+Un vote par fin
+
+ storage.objects
+Lecture publique du bucket posters
+
+Upload authentifié
+
+ 7. Déploiement
+ Supabase
+Base de données
+
+Auth
+
+Storage
+
+RLS activées
+
+ Vercel
+Variables à ajouter dans Environment Variables :
+
+NEXT_PUBLIC_SUPABASE_URL
+
+NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+NEXT_PUBLIC_OMDB_API_KEY
 
 
+ 8. Tests manuels
+Authentification : validé
 
-## Contributeurs
+CRUD œuvres (admin) : validé
 
-- Omar El Alami El Fellousse 
-- Clément  Dalberto
-- Luc Bernard Fernand BANAG LIBITE
+CRUD fins : validé
+
+Votes : validé
+
+API OMDb : validé
+
+Upload affiches : validé
+
+RLS Supabase conforme : validé
+
+Redirections login :validé
+
+ 9. Licence
+Projet académique — ECE WebTech 2024–2025.
+
+ 10. Remerciements
+Merci aux encadrants du cours, ainsi qu’aux technologies modernes Next.js, Supabase et OMDb API qui ont permis la réalisation de ce projet complet et formateur.
