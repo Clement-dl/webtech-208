@@ -10,6 +10,7 @@ import VoteBox from "@/components/VoteBox";
 
 export default function WorkPage() {
   const { workId } = useParams();
+
   const [work, setWork] = useState(null);
   const [endings, setEndings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,6 +21,10 @@ export default function WorkPage() {
   const [userId, setUserId] = useState(null);
   const [userVotes, setUserVotes] = useState(new Set());
 
+  // Infos venant de l’API OMDb
+  const [omdbInfo, setOmdbInfo] = useState(null);
+
+  // Chargement de l'œuvre + fins
   useEffect(() => {
     async function loadWork() {
       setLoading(true);
@@ -85,6 +90,7 @@ export default function WorkPage() {
     if (workId) loadWork();
   }, [workId]);
 
+  // Chargement user + ses votes
   useEffect(() => {
     async function loadUserAndVotes() {
       const id = await getCurrentUserId();
@@ -111,6 +117,43 @@ export default function WorkPage() {
 
     loadUserAndVotes();
   }, []);
+
+  // Appel à l’API OMDb à partir du titre de l’œuvre
+  useEffect(() => {
+    async function loadOmdbInfo() {
+      if (!work || !work.title) return;
+
+      const apiKey = process.env.NEXT_PUBLIC_OMDB_API_KEY;
+      if (!apiKey) return; // pas de clé, on ne fait rien
+
+      try {
+        const res = await fetch(
+          `https://www.omdbapi.com/?t=${encodeURIComponent(
+            work.title
+          )}&apikey=${apiKey}`
+        );
+        const data = await res.json();
+
+        if (data && data.Response === "True") {
+          setOmdbInfo({
+            year: data.Year,
+            runtime: data.Runtime,
+            imdbRating:
+              data.imdbRating && data.imdbRating !== "N/A"
+                ? data.imdbRating
+                : null,
+          });
+        } else {
+          setOmdbInfo(null);
+        }
+      } catch (err) {
+        console.error("Erreur OMDb:", err);
+        setOmdbInfo(null);
+      }
+    }
+
+    loadOmdbInfo();
+  }, [work]);
 
   async function handleVote(endingId) {
     if (!work || !userId) {
@@ -216,43 +259,67 @@ export default function WorkPage() {
               style={{ objectFit: "cover" }}
             />
           </div>
+
           <h1 className="text-2xl font-bold mt-4">{work.title}</h1>
+
           <p className="text-sm text-neutral-400 mt-1">
             {work.year ?? "—"} · {work.kind === "film" ? "movie" : "serie"} ·{" "}
             {work.genre ?? "—"}
           </p>
+
           {work.description && (
-  <p className="text-sm text-neutral-200 mt-4">{work.description}</p>
-)}
+            <p className="text-sm text-neutral-200 mt-4">
+              {work.description}
+            </p>
+          )}
 
-{userId ? (
-  <Link
-    href={`/works/${work.slug}/submit`}
-    className="btn-primary mt-6 w-full text-center"
-  >
-    Proposer une fin
-  </Link>
-) : (
-  <button
-    type="button"
-    disabled
-    className="btn-primary mt-6 w-full text-center bg-gray-800 border-gray-700 text-neutral-400 cursor-not-allowed hover:bg-gray-800 disabled:opacity-60"
-  >
-    Connectez-vous pour publier une fin
-  </button>
-)}
+          {/* Bloc infos OMDb */}
+          {omdbInfo && (
+            <div className="mt-4 text-xs text-neutral-300 border-t border-white/10 pt-3">
+              <p className="font-semibold text-sm mb-1">
+                Infos officielles (OMDb)
+              </p>
+              <p>
+                Durée : {omdbInfo.runtime || "N/A"}
+                {omdbInfo.imdbRating && (
+                  <> • Note IMDb : {omdbInfo.imdbRating}/10</>
+                )}
+              </p>
+            </div>
+          )}
 
+          {userId ? (
+            <Link
+              href={`/works/${work.slug}/submit`}
+              className="btn-primary mt-6 w-full text-center"
+            >
+              Proposer une fin
+            </Link>
+          ) : (
+            <button
+              type="button"
+              disabled
+              className="btn-primary mt-6 w-full text-center bg-gray-800 border-gray-700 text-neutral-400 cursor-not-allowed hover:bg-gray-800 disabled:opacity-60"
+            >
+              Connectez-vous pour publier une fin
+            </button>
+          )}
         </div>
 
         {/* Liste des fins */}
         <section className="flex-1 flex flex-col gap-4">
           <h2 className="text-xl font-semibold mb-4">Fins proposées</h2>
+
           {endings.length === 0 && (
-            <p className="text-sm text-neutral-400">Aucune fin n’a encore été proposée.</p>
+            <p className="text-sm text-neutral-400">
+              Aucune fin n’a encore été proposée.
+            </p>
           )}
+
           {voteError && (
             <p className="text-sm text-red-400 mb-2">{voteError}</p>
           )}
+
           {endings.map((ending) => (
             <article
               key={ending.id}
@@ -263,11 +330,21 @@ export default function WorkPage() {
               </h3>
               <p className="text-sm text-neutral-400 mb-2">
                 Proposée par{" "}
-                <span className="font-medium">{ending.author_name || "Anonyme"}</span> —{" "}
-                {ending.votes_count} vote{ending.votes_count !== 1 ? "s" : ""}
+                <span className="font-medium">
+                  {ending.author_name || "Anonyme"}
+                </span>{" "}
+                — {ending.votes_count} vote
+                {ending.votes_count !== 1 ? "s" : ""}
               </p>
-              <p className="text-sm whitespace-pre-wrap mb-3">{ending.content}</p>
-              <VoteBox endingId={ending.id} votesCount={ending.votes_count} />
+              <p className="text-sm whitespace-pre-wrap mb-3">
+                {ending.content}
+              </p>
+              <VoteBox
+                endingId={ending.id}
+                votesCount={ending.votes_count}
+                // si tu utilises handleVote ici, tu peux l'ajouter en prop
+                // onClickVote={() => handleVote(ending.id)}
+              />
             </article>
           ))}
         </section>
