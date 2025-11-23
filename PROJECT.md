@@ -19,16 +19,16 @@ Alt-Endings est une plateforme permettant aux utilisateurs de proposer des fins 
 ##  Captures d'écran (UI/UX)  
 
 - **Page d’accueil**  
-  https://github.com/Clement-dl/webtech-208/blob/main/docs/screenshots/03-works-grid.jpg
+  docs/screenshots/03-works-grid.jpg
 
 - **Page de recherche d'œuvres** 
-  https://github.com/Clement-dl/webtech-208/blob/main/docs/screenshots/05-works-search.jpg
+ docs/screenshots/05-works-search.jpg
 
 - **Page de filtres de genre**  
-https://github.com/Clement-dl/webtech-208/blob/main/docs/screenshots/04-works-filter-genre.jpg 
+ docs/screenshots/04-works-filter-genre.jpg 
 
 - **Formulaire de proposition d'une fin**  
-  https://github.com/Clement-dl/webtech-208/blob/main/docs/screenshots/08-submit-ending.jpg
+ docs/screenshots/08-submit-ending.jpg
 
 ---
 
@@ -99,7 +99,7 @@ Auto-évaluation :  Validé
 # 3.  Ingénierie & Architecture
 
 ##  Schéma de base de données
-https://github.com/Clement-dl/webtech-208/blob/main/docs/screenshots/supabase.png
+docs/screenshots/supabase.png
 
 **Auto-évaluation : Validé
 
@@ -107,11 +107,11 @@ https://github.com/Clement-dl/webtech-208/blob/main/docs/screenshots/supabase.pn
 
 ##  Row Level Security (RLS)
 Endings :
-https://github.com/Clement-dl/webtech-208/blob/main/docs/screenshots/RLS%20ending.png
+docs/screenshots/RLS%20ending.png
 works : 
-https://github.com/Clement-dl/webtech-208/blob/main/docs/screenshots/RLS%20works.png
+docs/screenshots/RLS%20works.png
 profiles & votes :
-https://github.com/Clement-dl/webtech-208/blob/main/docs/screenshots/RLS%20profiles%26votes.png
+docs/screenshots/RLS%20profiles%26votes.png
 
 **Auto-évaluation : Validé
 
