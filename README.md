@@ -209,8 +209,8 @@ RLS Supabase conforme : validé
 
 Redirections login :validé
 
- 9. Licence
+ # 6. Licence
 Projet académique — ECE WebTech 2024–2025.
 
- 10. Remerciements
-Merci aux encadrants du cours, ainsi qu’aux technologies modernes Next.js, Supabase et OMDb API qui ont permis la réalisation de ce projet complet et formateur.
+ # 7. Remerciements
+Merci au professeur du cours, ainsi qu’aux technologies modernes Next.js, Supabase et OMDb API qui ont permis la réalisation de ce projet complet et formateur.
