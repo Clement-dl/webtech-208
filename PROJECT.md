@@ -139,6 +139,7 @@ Omar El Alami El Fellousse :
 J’ajouterais une pagination, des commentaires, et une amélioration de l’UX mobile.
 
 Clément D'Alberto:  
+
 Luc Bernard Fernand BANAG LIBITE:
 Avec plus de temps, j’aurais aimé aller plus loin dans l’optimisation de la base de données, notamment en ajoutant plus de policies RLS et en améliorant la sécurité au niveau des accès. J’aurais aussi aimé mieux automatiser certaines relations et valider davantage les données côté serveur.
 
@@ -148,6 +149,8 @@ Avec plus de temps, j’aurais aimé aller plus loin dans l’optimisation de la
 Omar El Alami El Fellousse :  
 Cours très intéressant, j’ai vraiment aimé travailler avec Supabase et Next.js. Le projet final m’a beaucoup appris et m’a permis de comprendre concrètement comment construire une vraie application moderne de A à Z.
 Clément d'Alberto :
-Luc Bernard Fernand BANAG LIBITE : J’ai apprécié le fait de travailler sur un vrai projet complet, ce qui m’a permis de comprendre la logique entre front-end, back-end et base de données. Le cours est motivant et concret. Pour l'améliorer, quelques exemples guidés sur Supabase et les bonnes pratiques de structure de données seraient vraiment utiles.
+
+Luc Bernard Fernand BANAG LIBITE :
+J’ai apprécié le fait de travailler sur un vrai projet complet, ce qui m’a permis de comprendre la logique entre front-end, back-end et base de données. Le cours est motivant et concret. Pour l'améliorer, quelques exemples guidés sur Supabase et les bonnes pratiques de structure de données seraient vraiment utiles.
 
 #  Fin du document
