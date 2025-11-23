@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getCurrentUserId } from "@/lib/auth";
+import Carrousel from "@/components/Carousel";
 
 export default function HomePage() {
   const [userId, setUserId] = useState(null);
@@ -12,8 +13,10 @@ export default function HomePage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] flex flex-col justify-center">
-      <section className="container glass p-10 md:p-8 sm:p-6 rounded-3xl shadow-lg flex flex-col items-start animate-fade-in-up">
+    <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] flex flex-col justify-start">
+      
+      {/* Section Alt-Endings */}
+      <section className="container glass p-10 md:p-8 sm:p-6 rounded-3xl shadow-lg flex flex-col items-start animate-fade-in-up mt-10">
         <h1 className="text-5xl font-extrabold gradient-text mb-4 md:text-4xl sm:text-3xl">
           Alt-Endings
         </h1>
@@ -30,7 +33,7 @@ export default function HomePage() {
 
           {userId ? (
             <Link href="/works" className="btn-secondary">
-                Proposer une fin
+              Proposer une fin
             </Link>
           ) : (
             <button
@@ -47,6 +50,8 @@ export default function HomePage() {
           Merci de marquer clairement vos spoilers et de rester respectueux.
         </p>
       </section>
+      <Carrousel />
+
     </main>
   );
 }

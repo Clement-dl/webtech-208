@@ -2,9 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ============================================
-   Root + Variables (palette inspirée de ton SCSS)
-   ============================================ */
+/* ======
+   Root 
+   ====== */
 :root {
   --background: #030712;
   --foreground: #f9fafb;
@@ -18,9 +18,9 @@
   --glass-border: rgba(139, 92, 246, 0.15);
 }
 
-/* ============================================
-   Global Reset (+ amélioration vs SCSS)
-   ============================================ */
+/* ===============
+   Global Reset 
+   =============== */
 * {
   margin: 0;
   padding: 0;
