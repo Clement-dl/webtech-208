@@ -90,22 +90,39 @@ export default function Nav() {
               À propos
             </Link>
 
+            
+            {role === "user" && (
+            <Link
+            href="/mes-fins"
+            className={linkClass("/mes-fins")}
+              >
+            Mes fins
+            </Link>
+            )}  
+
             {role === "admin" && (
-              <>
-                <Link
-                  href="/works/publish"
-                  className={linkClass("/works/publish")}
-                >
-                  Publier
-                </Link>
-                <Link
-                  href="/works/my-works"
-                  className={linkClass("/works/my-works")}
-                >
-                  Mes œuvres
-                </Link>
-              </>
-            )}
+  <>
+    <Link
+      href="/works/publish"
+      className={linkClass("/works/publish")}
+    >
+      Publier
+    </Link>
+    <Link
+      href="/works/my-works"
+      className={linkClass("/works/my-works")}
+    >
+      Mes œuvres
+    </Link>
+    <Link
+      href="/mes-fins"
+      className={linkClass("/mes-fins")}
+    >
+      Mes fins
+    </Link>
+  </>
+)}
+
           </div>
         </div>
 
