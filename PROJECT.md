@@ -18,16 +18,13 @@ Alt-Endings est une plateforme permettant aux utilisateurs de proposer des fins 
 
 ##  Captures d'écran (UI/UX)  
 
-- ![Page d’accueil](docs/screenshots/03-works-grid.jpg)
+- ![Page d’accueil](docs/works-grid.png)
+  
+- ![Page de recherche d'œuvres](docs/screenshots/search.png)
 
-- **Page de recherche d'œuvres** 
- docs/screenshots/05-works-search.jpg
+- ![Page de filtres de genre](docs/screenshots/filtres.png) 
 
-- **Page de filtres de genre**  
- docs/screenshots/04-works-filter-genre.jpg 
-
-- **Formulaire de proposition d'une fin**  
- docs/screenshots/08-submit-ending.jpg
+- ![Formulaire de proposition d'une fin](docs/screenshots/submit.png)
 
 ---
 
@@ -97,20 +94,16 @@ Auto-évaluation :  Validé
 
 # 3.  Ingénierie & Architecture
 
-##  Schéma de base de données
-docs/screenshots/supabase.png
+##  ![Schéma de base de données](docs/screenshots/supabase.png)
 
 **Auto-évaluation : Validé
 
 ---
 
 ##  Row Level Security (RLS)
-Endings :
-docs/screenshots/RLS%20ending.png
-works : 
-docs/screenshots/RLS%20works.png
-profiles & votes :
-docs/screenshots/RLS%20profiles%26votes.png
+![Endings :](docs/screenshots/RLS ending.png)
+![works :] (docs/screenshots/RLS works.png)
+![profiles & votes :](docs/screenshots/RLS profiles&votes.png)
 
 **Auto-évaluation : Validé
 
