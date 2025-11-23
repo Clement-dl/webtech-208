@@ -18,8 +18,7 @@ Alt-Endings est une plateforme permettant aux utilisateurs de proposer des fins 
 
 ##  Captures d'écran (UI/UX)  
 
-- **Page d’accueil**  
-  docs/screenshots/03-works-grid.jpg
+- ![Page d’accueil](docs/screenshots/03-works-grid.jpg)
 
 - **Page de recherche d'œuvres** 
  docs/screenshots/05-works-search.jpg
