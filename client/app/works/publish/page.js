@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
+import Orb from "@/components/Background";
 
 export default function PublishWorkPage() {
   const router = useRouter();
@@ -71,92 +72,95 @@ export default function PublishWorkPage() {
   };
 
   return (
-    <main className="min-h-screen bg-background text-foreground section">
-      <section className="container py-8">
-        <div className="card p-6 max-w-3xl mx-auto">
-          <h1 className="text-3xl font-bold mb-6 gradient-text">Publier une œuvre</h1>
+    <main className="relative min-h-screen flex items-start justify-center overflow-hidden px-4 py-8">
+      {/* Orb en fond */}
+      <div className="fixed inset-0 -z-10 pointer-events-none">
+        <Orb hoverIntensity={0.5} rotateOnHover={true} hue={0} forceHoverState={false} />
+      </div>
 
-          {errorMsg && <p className="mb-4 text-sm text-red-400">{errorMsg}</p>}
+      <section className="glass w-full max-w-3xl p-6 rounded-2xl shadow-lg animate-fade-in-up">
+        <h1 className="text-3xl font-bold mb-6 gradient-text text-center">Publier une œuvre</h1>
 
-          <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-            <div>
-              <label className="block text-sm mb-1">Titre de l’œuvre</label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="input-field"
-                required
-              />
-            </div>
+        {errorMsg && <p className="mb-4 text-sm text-red-400">{errorMsg}</p>}
 
-            <div>
-              <label className="block text-sm mb-1">Année</label>
-              <input
-                type="number"
-                value={year}
-                onChange={(e) => setYear(e.target.value)}
-                className="input-field"
-                min="1900"
-                max="2100"
-              />
-            </div>
+        <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+          <div>
+            <label className="block text-sm mb-1">Titre de l’œuvre</label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="input-field"
+              required
+            />
+          </div>
 
-            <div>
-              <label className="block text-sm mb-1">Type</label>
-              <select
-                value={kind}
-                onChange={(e) => setKind(e.target.value)}
-                className="input-field"
-              >
-                <option value="film">Film</option>
-                <option value="serie">Série</option>
-              </select>
-            </div>
+          <div>
+            <label className="block text-sm mb-1">Année</label>
+            <input
+              type="number"
+              value={year}
+              onChange={(e) => setYear(e.target.value)}
+              className="input-field"
+              min="1900"
+              max="2100"
+            />
+          </div>
 
-            <div>
-              <label className="block text-sm mb-1">Genre</label>
-              <input
-                type="text"
-                value={genre}
-                onChange={(e) => setGenre(e.target.value)}
-                className="input-field"
-                placeholder="ex : Thriller, Science-fiction…"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm mb-1">Description</label>
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="input-field min-h-[120px]"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm mb-1">Affiche (image, bucket posters)</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                className="block text-sm"
-                required
-              />
-              <p className="text-xs text-foreground/60 mt-1">
-                L&apos;image sera uploadée dans le bucket <code>posters</code>.
-              </p>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn-primary w-full mt-2 disabled:opacity-60"
+          <div>
+            <label className="block text-sm mb-1">Type</label>
+            <select
+              value={kind}
+              onChange={(e) => setKind(e.target.value)}
+              className="input-field"
             >
-              {loading ? "Publication..." : "Publier"}
-            </button>
-          </form>
-        </div>
+              <option value="film">Film</option>
+              <option value="serie">Série</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm mb-1">Genre</label>
+            <input
+              type="text"
+              value={genre}
+              onChange={(e) => setGenre(e.target.value)}
+              className="input-field"
+              placeholder="ex : Thriller, Science-fiction…"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm mb-1">Description</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="input-field min-h-[120px]"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm mb-1">Affiche (image, bucket posters)</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              className="block text-sm"
+              required
+            />
+            <p className="text-xs text-foreground/60 mt-1">
+              L&apos;image sera uploadée dans le bucket <code>posters</code>.
+            </p>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn-primary w-full mt-2 text-center disabled:opacity-60"
+          >
+            {loading ? "Publication..." : "Publier"}
+          </button>
+        </form>
       </section>
     </main>
   );

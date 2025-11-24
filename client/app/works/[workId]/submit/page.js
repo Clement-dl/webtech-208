@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
 import { getCurrentUserId } from "@/lib/auth";
+import Orb from "@/components/Background";
 
 export default function SubmitEndingPage() {
   const { workId } = useParams();
@@ -48,69 +49,69 @@ export default function SubmitEndingPage() {
   }, [workId]);
 
   async function handleSubmit(e) {
-  e.preventDefault();
-  if (!work) return;
+    e.preventDefault();
+    if (!work) return;
 
-  setSubmitting(true);
-  setErrorMsg("");
-  setSuccessMsg("");
+    setSubmitting(true);
+    setErrorMsg("");
+    setSuccessMsg("");
 
-  try {
-    // 1) Récupérer l'id de l'utilisateur connecté
-    const userId = await getCurrentUserId();
+    try {
+      const userId = await getCurrentUserId();
 
-    if (!userId) {
-      setErrorMsg("Vous devez être connecté pour publier une fin.");
+      if (!userId) {
+        setErrorMsg("Vous devez être connecté pour publier une fin.");
+        setSubmitting(false);
+        return;
+      }
+
+      const { error } = await supabase.from("endings").insert({
+        work_id: work.id,
+        title: title || null,
+        author_name: authorName || "Anonyme",
+        content,
+        created_by: userId,
+      });
+
+      if (error) {
+        console.error("Erreur insert Supabase (ending):", error);
+        setErrorMsg("Impossible d'enregistrer la fin (erreur Supabase).");
+      } else {
+        setSuccessMsg("Fin enregistrée avec succès !");
+        setTitle("");
+        setAuthorName("");
+        setContent("");
+        router.push(`/works/${work.slug}`);
+      }
+    } catch (err) {
+      console.error(err);
+      setErrorMsg(
+        "Une erreur inattendue est survenue lors de l'enregistrement."
+      );
+    } finally {
       setSubmitting(false);
-      return;
     }
-
-    // 2) Insérer la fin avec created_by = userId
-    const { error } = await supabase.from("endings").insert({
-      work_id: work.id,
-      title: title || null,
-      author_name: authorName || "Anonyme",
-      content,
-      created_by: userId,
-    });
-
-    if (error) {
-      console.error("Erreur insert Supabase (ending):", error);
-      setErrorMsg("Impossible d'enregistrer la fin (erreur Supabase).");
-    } else {
-      setSuccessMsg("Fin enregistrée avec succès !");
-      setTitle("");
-      setAuthorName("");
-      setContent("");
-      router.push(`/works/${work.slug}`);
-    }
-  } catch (err) {
-    console.error(err);
-    setErrorMsg(
-      "Une erreur inattendue est survenue lors de l'enregistrement."
-    );
-  } finally {
-    setSubmitting(false);
   }
-}
-
 
   if (loadingWork) {
     return (
-      <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] flex items-center justify-center px-4">
-        <p>Chargement...</p>
+      <main className="relative min-h-screen flex items-center justify-center overflow-hidden px-4">
+        <div className="fixed inset-0 -z-10 pointer-events-none">
+          <Orb hoverIntensity={0.5} rotateOnHover={true} hue={0} forceHoverState={false} />
+        </div>
+        <p className="text-[var(--foreground)]">Chargement...</p>
       </main>
     );
   }
 
   if (loadError || !work) {
     return (
-      <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] flex flex-col items-center justify-center px-4">
-        <p className="mb-4">{loadError || "Œuvre introuvable."}</p>
-        <Link
-          href="/works"
-          className="btn-secondary"
-        >
+      <main className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden px-4">
+        <div className="fixed inset-0 -z-10 pointer-events-none">
+          <Orb hoverIntensity={0.5} rotateOnHover={true} hue={0} forceHoverState={false} />
+        </div>
+        <p className="mb-4 text-[var(--foreground)]">{loadError || "Œuvre introuvable."}</p>
+        <Link href="/works" className="btn-secondary">
           Retour aux œuvres
         </Link>
       </main>
@@ -118,7 +119,11 @@ export default function SubmitEndingPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] flex justify-center px-4 py-6">
+    <main className="relative min-h-screen flex justify-center overflow-hidden px-4 py-6">
+      <div className="fixed inset-0 -z-10 pointer-events-none">
+        <Orb hoverIntensity={0.5} rotateOnHover={true} hue={0} forceHoverState={false} />
+      </div>
+
       <section className="glass w-full max-w-3xl p-6 rounded-2xl shadow-lg animate-fade-in-up">
         <Link
           href={`/works/${work.slug}`}
@@ -133,9 +138,7 @@ export default function SubmitEndingPage() {
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
-            <label className="block text-sm mb-1">
-              Titre de la fin (optionnel)
-            </label>
+            <label className="block text-sm mb-1">Titre de la fin (optionnel)</label>
             <input
               type="text"
               value={title}
@@ -145,9 +148,7 @@ export default function SubmitEndingPage() {
           </div>
 
           <div>
-            <label className="block text-sm mb-1">
-              Auteur (optionnel)
-            </label>
+            <label className="block text-sm mb-1">Auteur (optionnel)</label>
             <input
               type="text"
               value={authorName}

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { signup, login } from "@/lib/auth";
+import Orb from "@/components/Background";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -33,7 +34,6 @@ export default function SignupPage() {
       return;
     }
 
-    // 🔹 On force une vraie connexion juste après l'inscription
     const { user: loggedInUser, error: loginError } = await login({
       email,
       password,
@@ -55,8 +55,20 @@ export default function SignupPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] flex items-center justify-center px-4">
-      <section className="glass w-full max-w-md rounded-2xl p-8 shadow-lg animate-fade-in-up">
+    <main className="relative min-h-screen w-full flex items-start justify-center px-4">
+
+      {/* Orb en arrière-plan */}
+      <div className="fixed inset-0 -z-10 pointer-events-none">
+        <Orb
+          hoverIntensity={0.5}
+          rotateOnHover={true}
+          hue={0}
+          forceHoverState={false}
+        />
+      </div>
+
+      {/* Encadré remonté davantage */}
+      <section className="glass w-full max-w-md rounded-2xl p-8 shadow-lg animate-fade-in-up -translate-y-48">
         <h1 className="text-2xl font-bold text-center mb-6 gradient-text">
           Inscription
         </h1>

@@ -1,268 +1,182 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { supabase } from "@/lib/supabaseClient";
-import { getCurrentUserRole } from "@/lib/auth";
+import { getCurrentUserId } from "@/lib/auth";
+import VoteBox from "@/components/VoteBox";
+import Orb from "@/components/Background";
 
-export default function MyWorksPage() {
-  const router = useRouter();
+export default function WorkPage() {
+  const { workId } = useParams();
+
+  const [work, setWork] = useState(null);
+  const [endings, setEndings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
-  const [works, setWorks] = useState([]);
-
-  const [editingId, setEditingId] = useState(null);
-  const [editFields, setEditFields] = useState({
-    title: "",
-    year: "",
-    kind: "film",
-    genre: "",
-    description: "",
-  });
+  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
-    let mounted = true;
-
-    async function load() {
+    async function loadWork() {
       setLoading(true);
       setErrorMsg("");
 
-      const { data: userData, error: userError } = await supabase.auth.getUser();
-      if (userError || !userData?.user) {
-        if (!mounted) return;
-        setErrorMsg("Vous devez être connecté·e.");
-        router.push("/login");
-        return;
-      }
-
-      const userId = userData.user.id;
-      const role = await getCurrentUserRole();
-      if (!mounted) return;
-
-      if (role !== "admin") {
-        setErrorMsg("Accès réservé aux administrateurs.");
-        router.push("/");
-        return;
-      }
-
       const { data, error } = await supabase
         .from("works")
-        .select("id, slug, title, year, kind, genre, description, poster_path, created_at")
-        .eq("created_by", userId)
-        .order("created_at", { ascending: false });
-
-      if (!mounted) return;
+        .select(
+          `id, slug, title, year, kind, genre, description, poster_path,
+           endings (id, title, author_name, content, created_at, votes:votes(count))`
+        )
+        .eq("slug", workId)
+        .single();
 
       if (error) {
-        console.error("Erreur chargement works:", error);
-        setErrorMsg("Impossible de charger vos œuvres.");
+        console.error("Erreur Supabase (work):", error);
+        setErrorMsg("Impossible de charger cette œuvre.");
+      } else if (!data) {
+        setErrorMsg("Œuvre introuvable.");
       } else {
-        setWorks(data ?? []);
+        const endingsWithCounts = (data.endings ?? []).map((e) => ({
+          id: e.id,
+          title: e.title,
+          author_name: e.author_name,
+          content: e.content,
+          created_at: e.created_at,
+          votes_count: e.votes?.[0]?.count ?? 0,
+        }));
+
+        setWork({
+          id: data.id,
+          slug: data.slug,
+          title: data.title,
+          year: data.year,
+          kind: data.kind,
+          genre: data.genre,
+          description: data.description,
+          poster_path: data.poster_path,
+        });
+
+        setEndings(endingsWithCounts);
       }
 
       setLoading(false);
     }
 
-    load();
-    return () => {
-      mounted = false;
-    };
-  }, [router]);
+    if (workId) loadWork();
+  }, [workId]);
 
-  const startEdit = (work) => {
-    setEditingId(work.id);
-    setEditFields({
-      title: work.title || "",
-      year: work.year || "",
-      kind: work.kind || "film",
-      genre: work.genre || "",
-      description: work.description || "",
-    });
-  };
-
-  const cancelEdit = () => setEditingId(null);
-
-  const handleFieldChange = (field, value) =>
-    setEditFields((prev) => ({ ...prev, [field]: value }));
-
-  const handleUpdate = async (workId) => {
-    setErrorMsg("");
-
-    const payload = {
-      title: editFields.title.trim(),
-      year: editFields.year ? Number(editFields.year) : null,
-      kind: editFields.kind,
-      genre: editFields.genre.trim() || null,
-      description: editFields.description.trim() || null,
-    };
-
-    const { data, error } = await supabase
-      .from("works")
-      .update(payload)
-      .eq("id", workId)
-      .select("*")
-      .single();
-
-    if (error) {
-      console.error("Erreur update work:", error);
-      setErrorMsg("Impossible de mettre à jour l'œuvre.");
-      return;
+  useEffect(() => {
+    async function loadUser() {
+      const id = await getCurrentUserId();
+      setUserId(id);
     }
+    loadUser();
+  }, []);
 
-    setWorks((prev) => prev.map((w) => (w.id === workId ? data : w)));
-    setEditingId(null);
-  };
+  if (loading) {
+    return (
+      <main className="relative min-h-screen flex items-center justify-center overflow-hidden px-4">
+        <div className="fixed inset-0 -z-10 pointer-events-none">
+          <Orb hoverIntensity={0.5} rotateOnHover={true} hue={0} forceHoverState={false} />
+        </div>
+        <p className="text-[var(--foreground)]">Chargement...</p>
+      </main>
+    );
+  }
 
-  const handleDelete = async (workId) => {
-    setErrorMsg("");
-    const ok = window.confirm("Supprimer définitivement cette œuvre ?");
-    if (!ok) return;
+  if (errorMsg || !work) {
+    return (
+      <main className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden px-4">
+        <div className="fixed inset-0 -z-10 pointer-events-none">
+          <Orb hoverIntensity={0.5} rotateOnHover={true} hue={0} forceHoverState={false} />
+        </div>
+        <p className="mb-4 text-[var(--foreground)]">{errorMsg || "Œuvre introuvable."}</p>
+        <Link href="/works" className="btn-secondary">
+          Retour aux œuvres
+        </Link>
+      </main>
+    );
+  }
 
-    const { error } = await supabase.from("works").delete().eq("id", workId);
-    if (error) {
-      console.error("Erreur delete work:", error);
-      setErrorMsg("Impossible de supprimer l'œuvre.");
-      return;
-    }
-
-    setWorks((prev) => prev.filter((w) => w.id !== workId));
-  };
+  const posterSrc =
+    work.poster_path && work.poster_path.trim() !== ""
+      ? work.poster_path
+      : "/posters/placeholder.svg";
 
   return (
-    <main className="min-h-screen bg-background text-foreground section">
-      <section className="container py-8">
-        <h1 className="text-4xl font-bold mb-8 gradient-text">Mes œuvres publiées</h1>
+    <main className="relative min-h-screen px-4 py-6 overflow-hidden">
+      <div className="fixed inset-0 -z-10 pointer-events-none">
+        <Orb hoverIntensity={0.5} rotateOnHover={true} hue={0} forceHoverState={false} />
+      </div>
 
-        {errorMsg && <p className="mb-4 text-sm text-red-400">{errorMsg}</p>}
-        {loading && <p className="text-foreground/70">Chargement…</p>}
-        {!loading && works.length === 0 && (
-          <p className="text-foreground/60">Vous n&apos;avez encore publié aucune œuvre.</p>
-        )}
+      <Link
+        href="/works"
+        className="text-sm text-[var(--accent)] hover:text-[var(--accent-hover)] underline mb-4 inline-block"
+      >
+        ← Retour aux œuvres
+      </Link>
 
-        <div className="flex flex-col gap-6 mt-4">
-          {works.map((work) => {
-            const posterSrc = work.poster_path?.trim() || "/posters/placeholder.svg";
-            const isEditing = editingId === work.id;
+      <div className="flex flex-col md:flex-row gap-8">
+        {/* Poster + infos */}
+        <div className="w-full md:w-1/3 glass p-4 rounded-xl shadow-md flex flex-col">
+          <div className="relative w-full aspect-[2/3] rounded-md overflow-hidden">
+            <Image src={posterSrc} alt={work.title} fill style={{ objectFit: "cover" }} />
+          </div>
 
-            return (
-              <article
-                key={work.id}
-                className="card card-shine flex flex-col md:flex-row gap-4"
+          <h1 className="text-2xl font-bold mt-4">{work.title}</h1>
+          <p className="text-sm text-neutral-400 mt-1">
+            {work.year ?? "—"} · {work.kind === "film" ? "movie" : "serie"} · {work.genre ?? "—"}
+          </p>
+
+          {work.description && (
+            <p className="text-sm text-neutral-200 mt-4">{work.description}</p>
+          )}
+
+          <div className="mt-6 w-full flex justify-center md:justify-start">
+            {userId ? (
+              <Link
+                href={`/works/${work.slug}/submit`}
+                className="btn-primary w-full md:w-auto text-center"
               >
-                {/* Poster */}
-                <div className="w-full md:w-1/4">
-                  <div className="relative w-full aspect-[2/3] rounded-xl overflow-hidden bg-white/5">
-                    <Image src={posterSrc} alt={work.title} fill style={{ objectFit: "cover" }} />
-                  </div>
-                </div>
-
-                {/* Contenu */}
-                <div className="flex-1 flex flex-col gap-3">
-                  {isEditing ? (
-                    <>
-                      <input
-                        type="text"
-                        value={editFields.title}
-                        onChange={(e) => handleFieldChange("title", e.target.value)}
-                        className="input-field"
-                        placeholder="Titre"
-                      />
-                      <div className="flex flex-wrap gap-3">
-                        <input
-                          type="number"
-                          value={editFields.year}
-                          onChange={(e) => handleFieldChange("year", e.target.value)}
-                          className="input-field w-24"
-                          placeholder="Année"
-                        />
-                        <select
-                          value={editFields.kind}
-                          onChange={(e) => handleFieldChange("kind", e.target.value)}
-                          className="input-field"
-                        >
-                          <option value="film">Film</option>
-                          <option value="serie">Série</option>
-                        </select>
-                        <input
-                          type="text"
-                          value={editFields.genre}
-                          onChange={(e) => handleFieldChange("genre", e.target.value)}
-                          className="input-field flex-1"
-                          placeholder="Genre"
-                        />
-                      </div>
-                      <textarea
-                        value={editFields.description}
-                        onChange={(e) => handleFieldChange("description", e.target.value)}
-                        className="input-field min-h-[80px]"
-                        placeholder="Description"
-                      />
-
-                      <div className="flex gap-3 mt-2">
-                        <button
-                          type="button"
-                          onClick={() => handleUpdate(work.id)}
-                          className="btn-primary"
-                        >
-                          Enregistrer
-                        </button>
-                        <button
-                          type="button"
-                          onClick={cancelEdit}
-                          className="btn-secondary"
-                        >
-                          Annuler
-                        </button>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <h2 className="text-lg font-semibold">{work.title}</h2>
-                      <p className="text-sm text-foreground/60">
-                        {work.year ?? "—"} · {work.kind === "film" ? "movie" : "serie"} ·{" "}
-                        {work.genre ?? "—"}
-                      </p>
-                      {work.description && (
-                        <p className="text-sm text-foreground/60">{work.description}</p>
-                      )}
-                    </>
-                  )}
-
-                  {/* Actions */}
-                  <div className="flex flex-wrap gap-3 mt-auto pt-2">
-                    <Link
-                      href={`/works/${work.slug}`}
-                      className="btn-secondary flex-1 text-center"
-                    >
-                      Voir la fiche
-                    </Link>
-
-                    {!isEditing && (
-                      <button
-                        type="button"
-                        onClick={() => startEdit(work)}
-                        className="btn-primary flex-1 text-center"
-                      >
-                        Modifier
-                      </button>
-                    )}
-
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(work.id)}
-                      className="btn-secondary border-red-500 text-red-400 flex-1 text-center"
-                    >
-                      Supprimer
-                    </button>
-                  </div>
-                </div>
-              </article>
-            );
-          })}
+                Proposer une fin
+              </Link>
+            ) : (
+              <button
+                type="button"
+                disabled
+                className="btn-primary w-full md:w-auto text-center bg-gray-800 border-gray-700 text-neutral-400 cursor-not-allowed hover:bg-gray-800 disabled:opacity-60"
+              >
+                Connectez-vous pour publier une fin
+              </button>
+            )}
+          </div>
         </div>
-      </section>
+
+        {/* Liste des fins */}
+        <section className="flex-1 flex flex-col gap-4">
+          <h2 className="text-xl font-semibold mb-4">Fins proposées</h2>
+
+          {endings.length === 0 && (
+            <p className="text-sm text-neutral-400">Aucune fin n’a encore été proposée.</p>
+          )}
+
+          {endings.map((ending) => (
+            <article
+              key={ending.id}
+              className="glass p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow"
+            >
+              <h3 className="font-semibold text-lg mb-1">{ending.title || "Fin sans titre"}</h3>
+              <p className="text-sm text-neutral-400 mb-2">
+                Proposée par <span className="font-medium">{ending.author_name || "Anonyme"}</span> — {ending.votes_count} vote{ending.votes_count !== 1 ? "s" : ""}
+              </p>
+              <p className="text-sm whitespace-pre-wrap mb-3">{ending.content}</p>
+              <VoteBox endingId={ending.id} votesCount={ending.votes_count} />
+            </article>
+          ))}
+        </section>
+      </div>
     </main>
   );
 }

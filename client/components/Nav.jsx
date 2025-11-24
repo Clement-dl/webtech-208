@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { logout, getCurrentUserRole } from "@/lib/auth";
@@ -9,7 +10,7 @@ import { logout, getCurrentUserRole } from "@/lib/auth";
 export default function Nav() {
   const pathname = usePathname();
   const [authed, setAuthed] = useState(false);
-  const [role, setRole] = useState(null); // "user" | "admin" | null
+  const [role, setRole] = useState(null);
 
   useEffect(() => {
     let mounted = true;
@@ -55,15 +56,15 @@ export default function Nav() {
     };
   }, []);
 
-  const linkClass = (href) => {
-    const isActive = pathname === href || pathname.startsWith(href + "/");
+  const isActive = (href) =>
+    pathname === href || pathname.startsWith(href + "/");
 
-    return `px-3 py-2 text-sm font-semibold transition-all duration-300 ${
-      isActive
-        ? "text-white bg-[rgba(139,92,246,0.2)] rounded-lg"
-        : "text-neutral-300 hover:text-white hover:bg-[rgba(139,92,246,0.1)] rounded-lg"
+  const linkClass = (href) =>
+    `px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+      isActive(href)
+        ? "text-white bg-[rgba(255,255,255,0.1)]"
+        : "text-neutral-300 hover:text-white hover:bg-[rgba(255,255,255,0.05)]"
     }`;
-  };
 
   const handleLogout = async () => {
     await logout();
@@ -71,83 +72,65 @@ export default function Nav() {
   };
 
   return (
-    <nav className="w-full glass shadow-md sticky top-0 z-50 backdrop-blur-lg border-b border-[rgba(139,92,246,0.1)]">
-      <div className="max-w-6xl mx-auto flex items-center justify-between px-6 py-3 md:px-4 sm:px-2">
-        {/* Logo + liens */}
-        <div className="flex items-center gap-8 md:gap-4 sm:gap-2 flex-wrap">
-          <Link href="/" className="text-2xl font-extrabold gradient-text">
+    <nav className="w-full">
+      <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
+        <div className="flex items-center gap-3">
+          <Image
+            src="/logoaltendings.png"
+            alt="Alt-Endings Logo"
+            width={40}
+            height={40}
+            className="object-contain"
+          />
+          <span className="text-2xl font-extrabold gradient-text">
             Alt-Endings
+          </span>
+        </div>
+        <div className="flex items-center gap-2 glass-light px-4 py-2 rounded-2xl">
+          <Link href="/" className={linkClass("/")}>
+            Accueil
+          </Link>
+          <Link href="/works" className={linkClass("/works")}>
+            Œuvres
+          </Link>
+          <Link href="/about" className={linkClass("/about")}>
+            À propos
           </Link>
 
-          <div className="flex items-center gap-4 flex-wrap">
-            <Link href="/" className={linkClass("/")}>
-              Accueil
+          {role === "user" && (
+            <Link href="/mes-fins" className={linkClass("/mes-fins")}>
+              Mes fins
             </Link>
-            <Link href="/works" className={linkClass("/works")}>
-              Œuvres
-            </Link>
-            <Link href="/about" className={linkClass("/about")}>
-              À propos
-            </Link>
+          )}
 
-            
-            {role === "user" && (
-            <Link
-            href="/mes-fins"
-            className={linkClass("/mes-fins")}
-              >
-            Mes fins
-            </Link>
-            )}  
-
-            {role === "admin" && (
-  <>
-    <Link
-      href="/works/publish"
-      className={linkClass("/works/publish")}
-    >
-      Publier
-    </Link>
-    <Link
-      href="/works/my-works"
-      className={linkClass("/works/my-works")}
-    >
-      Mes œuvres
-    </Link>
-    <Link
-      href="/mes-fins"
-      className={linkClass("/mes-fins")}
-    >
-      Mes fins
-    </Link>
-  </>
-)}
-
-          </div>
+          {role === "admin" && (
+            <>
+              <Link href="/works/publish" className={linkClass("/works/publish")}>
+                Publier
+              </Link>
+              <Link href="/works/my-works" className={linkClass("/works/my-works")}>
+                Mes œuvres
+              </Link>
+              <Link href="/mes-fins" className={linkClass("/mes-fins")}>
+                Mes fins
+              </Link>
+            </>
+          )}
         </div>
-
-        {/* Droite : login / logout */}
-        <div className="flex items-center gap-3 md:gap-2 sm:gap-1 flex-wrap text-sm">
+        <div className="flex items-center gap-2">
           {authed ? (
             <button
-              type="button"
               onClick={handleLogout}
-              className="btn-secondary glow transition-all duration-300"
+              className="btn-secondary glow"
             >
               Se déconnecter
             </button>
           ) : (
             <>
-              <Link
-                href="/login"
-                className="btn-primary glow transition-all duration-300"
-              >
+              <Link href="/login" className="btn-primary glow">
                 Se connecter
               </Link>
-              <Link
-                href="/signup"
-                className="btn-secondary glow transition-all duration-300"
-              >
+              <Link href="/signup" className="btn-secondary glow">
                 Inscription
               </Link>
             </>

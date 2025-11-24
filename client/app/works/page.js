@@ -5,9 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
 import { getCurrentUserId } from "@/lib/auth";
-
-
-
+import Orb from "@/components/Background";
 
 // helpers
 const norm = (s) => (s ? s.trim().toLowerCase() : "");
@@ -23,10 +21,8 @@ export default function WorksPage() {
 
   const [userId, setUserId] = useState(null);
   useEffect(() => {
-  getCurrentUserId().then(setUserId);
-}, []);
-
-
+    getCurrentUserId().then(setUserId);
+  }, []);
 
   useEffect(() => {
     async function loadWorks() {
@@ -36,17 +32,7 @@ export default function WorksPage() {
       const { data, error } = await supabase
         .from("works")
         .select(
-          `
-          id,
-          slug,
-          title,
-          year,
-          kind,
-          genre,
-          description,
-          poster_path,
-          endings ( id )
-        `
+          `id, slug, title, year, kind, genre, description, poster_path, endings ( id )`
         )
         .order("title", { ascending: true });
 
@@ -82,14 +68,19 @@ export default function WorksPage() {
     );
 
   return (
-    <main className="min-h-screen bg-background text-foreground section">
-      <section className="container py-8">
-        <h1 className="text-4xl font-bold mb-8 gradient-text">Œuvres</h1>
+    <main className="relative min-h-screen flex flex-col items-center px-4 py-8 overflow-hidden text-foreground">
+      {/* Orb en fond */}
+      <div className="fixed inset-0 -z-10 pointer-events-none">
+        <Orb hoverIntensity={0.5} rotateOnHover={true} hue={0} forceHoverState={false} />
+      </div>
+
+      <section className="w-full max-w-7xl flex flex-col gap-8">
+        <h1 className="text-4xl font-bold mb-8 gradient-text text-center">Œuvres</h1>
 
         {/* Filtres */}
-        <div className="flex flex-col gap-4 mb-8">
+        <div className="flex flex-col gap-4 mb-8 items-center">
           {/* Genres */}
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 justify-center">
             <button
               className={`btn-secondary ${!genreFilter ? "bg-white/10 text-white border-white/50" : ""}`}
               onClick={() => setGenreFilter(null)}
@@ -108,7 +99,7 @@ export default function WorksPage() {
           </div>
 
           {/* Types */}
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 justify-center">
             {["all", "film", "serie"].map((type) => (
               <button
                 key={type}
@@ -122,7 +113,7 @@ export default function WorksPage() {
 
           {/* Search */}
           <form
-            className="flex gap-3 max-w-xl"
+            className="flex gap-3 max-w-xl justify-center"
             onSubmit={(e) => e.preventDefault()}
           >
             <input
@@ -138,10 +129,10 @@ export default function WorksPage() {
           </form>
         </div>
 
-        {loading && <p className="text-foreground/70">Chargement des œuvres...</p>}
-        {errorMsg && <p className="text-red-400 mb-4">{errorMsg}</p>}
+        {loading && <p className="text-foreground/70 text-center">Chargement des œuvres...</p>}
+        {errorMsg && <p className="text-red-400 mb-4 text-center">{errorMsg}</p>}
         {!loading && !errorMsg && filteredWorks.length === 0 && (
-          <p className="text-foreground/70">Aucune œuvre trouvée.</p>
+          <p className="text-foreground/70 text-center">Aucune œuvre trouvée.</p>
         )}
 
         {/* Grille des œuvres */}
@@ -180,22 +171,21 @@ export default function WorksPage() {
                       Voir les fins
                     </Link>
                     {userId ? (
-    <Link
-      href={`/works/${work.slug}/submit`}
-      className="btn-secondary flex-1 text-center"
-    >
-      Proposer une fin
-    </Link>
-  ) : (
-    <button
-      type="button"
-      disabled
-      className="btn-secondary flex-1 text-center bg-gray-800 border-gray-700 text-neutral-400 cursor-not-allowed disabled:opacity-60"
-    >
-      Proposer une fin
-    </button>
-  )}
-
+                      <Link
+                        href={`/works/${work.slug}/submit`}
+                        className="btn-secondary flex-1 text-center"
+                      >
+                        Proposer une fin
+                      </Link>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled
+                        className="btn-secondary flex-1 text-center bg-gray-800 border-gray-700 text-neutral-400 cursor-not-allowed disabled:opacity-60"
+                      >
+                        Proposer une fin
+                      </button>
+                    )}
                   </div>
                 </div>
               </article>

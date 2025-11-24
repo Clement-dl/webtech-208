@@ -66,16 +66,13 @@ body::before {
   content: "";
   position: fixed;
   inset: 0;
-
-  background:
-    radial-gradient(ellipse at top, rgba(139, 92, 246, 0.1), transparent 50%),
-    radial-gradient(ellipse at bottom, rgba(59, 130, 246, 0.05), transparent 50%);
-
+  background: transparent !important;
   pointer-events: none;
   z-index: -1;
 }
 
-/* ============
+
+/* ============  
    Scrollbar 
    ============ */
 ::-webkit-scrollbar {
@@ -181,6 +178,7 @@ body::before {
   .glow {
     box-shadow: 0 0 35px rgba(139, 92, 246, 0.35);
   }
+
   .container {
     @apply max-w-[1660px] mx-auto px-4;
   }
@@ -197,8 +195,8 @@ body::before {
   .mb-2 { @apply mb-8; }
 }
 
-/* ============
-   Animations
+/* ============  
+   Animations 
    ============ */
 @keyframes fadeInUp {
   from {
@@ -214,3 +212,12 @@ body::before {
 .animate-fade-in-up {
   animation: fadeInUp 0.55s ease-out forwards;
 }
+
+header,
+footer,
+main {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+

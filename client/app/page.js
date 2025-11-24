@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getCurrentUserId } from "@/lib/auth";
 import Carrousel from "@/components/Carousel";
+import Orb from "@/components/Background";
 
 export default function HomePage() {
   const [userId, setUserId] = useState(null);
@@ -13,9 +14,17 @@ export default function HomePage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] flex flex-col items-center">
-    
-      <section className="glass p-8 md:p-6 sm:p-4 rounded-3xl shadow-lg flex flex-col items-center text-center animate-fade-in-up mt-16 max-w-3xl">
+    <main className="relative min-h-screen w-full flex flex-col items-center pt-16 overflow-hidden">
+      
+      <div className="fixed inset-0 -z-10 pointer-events-none">
+        <Orb
+          hoverIntensity={0.5}
+          rotateOnHover={true}
+          hue={0}
+          forceHoverState={false}
+        />
+      </div>
+      <section className="glass p-8 md:p-6 sm:p-4 rounded-3xl shadow-lg flex flex-col items-center text-center animate-fade-in-up max-w-3xl">
 
         <h1 className="text-4xl md:text-3xl sm:text-2xl font-extrabold gradient-text mb-4">
           Alt-Endings
@@ -26,14 +35,10 @@ export default function HomePage() {
         </p>
 
         <div className="flex gap-4 flex-wrap justify-center mb-4">
-          <Link href="/works" className="btn-primary">
-            Voir les œuvres
-          </Link>
+          <Link href="/works" className="btn-primary">Voir les œuvres</Link>
 
           {userId ? (
-            <Link href="/works" className="btn-secondary">
-              Proposer une fin
-            </Link>
+            <Link href="/works" className="btn-secondary">Proposer une fin</Link>
           ) : (
             <button
               type="button"
@@ -48,6 +53,7 @@ export default function HomePage() {
         <p className="text-xs text-neutral-400">
           Merci de marquer clairement vos spoilers et de rester respectueux.
         </p>
+
       </section>
 
       <Carrousel />

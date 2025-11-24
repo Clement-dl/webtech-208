@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { getCurrentUserId } from "@/lib/auth";
+import Orb from "@/components/Background";
 
 export default function MyEndingsPage() {
   const router = useRouter();
@@ -134,14 +135,21 @@ export default function MyEndingsPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] flex items-center justify-center px-4">
+      <main className="relative min-h-screen w-full flex items-center justify-center px-4 overflow-hidden">
+        <div className="fixed inset-0 -z-10 pointer-events-none">
+          <Orb hoverIntensity={0.5} rotateOnHover={true} hue={0} forceHoverState={false} />
+        </div>
         <p>Chargement...</p>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)] px-4 py-6">
+    <main className="relative min-h-screen text-[var(--foreground)] px-4 py-6 overflow-auto">
+      <div className="fixed inset-0 -z-10 pointer-events-none">
+        <Orb hoverIntensity={0.5} rotateOnHover={true} hue={0} forceHoverState={false} />
+      </div>
+
       <section className="max-w-5xl mx-auto">
         <h1 className="text-3xl font-bold mb-4 gradient-text">Mes fins</h1>
         <p className="text-sm text-neutral-300 mb-6">
@@ -149,9 +157,7 @@ export default function MyEndingsPage() {
           Vous pouvez les modifier ou les supprimer.
         </p>
 
-        {errorMsg && (
-          <p className="text-sm text-red-400 mb-4">{errorMsg}</p>
-        )}
+        {errorMsg && <p className="text-sm text-red-400 mb-4">{errorMsg}</p>}
 
         {endings.length === 0 && (
           <p className="text-sm text-neutral-400">
@@ -171,14 +177,9 @@ export default function MyEndingsPage() {
                     {ending.work?.title || "Œuvre inconnue"}
                   </h2>
                   <p className="text-xs text-neutral-400">
-                    Proposée le{" "}
-                    {new Date(ending.created_at).toLocaleString("fr-FR")}
+                    Proposée le {new Date(ending.created_at).toLocaleString("fr-FR")}
                     {typeof ending.votes_count === "number" && (
-                      <>
-                        {" "}
-                        — {ending.votes_count} vote
-                        {ending.votes_count !== 1 ? "s" : ""}
-                      </>
+                      <> — {ending.votes_count} vote{ending.votes_count !== 1 ? "s" : ""}</>
                     )}
                   </p>
                 </div>
@@ -198,9 +199,7 @@ export default function MyEndingsPage() {
                   rows={4}
                   value={ending.editContent}
                   onChange={(e) =>
-                    updateLocalEnding(ending.id, {
-                      editContent: e.target.value,
-                    })
+                    updateLocalEnding(ending.id, { editContent: e.target.value })
                   }
                   className="w-full bg-[rgba(15,23,42,0.9)] border border-[rgba(148,163,184,0.4)] rounded-lg px-3 py-2 text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] whitespace-pre-wrap"
                 />
