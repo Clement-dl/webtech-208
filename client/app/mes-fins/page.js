@@ -123,7 +123,7 @@ export default function MyEndingsPage() {
         setErrorMsg("Impossible de supprimer cette fin.");
       } else {
         setEndings((prev) => prev.filter((e) => e.id !== id));
-        setConfirmId(null); // fermer la confirmation
+        setConfirmId(null); 
       }
     } catch (err) {
       console.error(err);

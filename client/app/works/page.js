@@ -7,7 +7,6 @@ import { supabase } from "@/lib/supabaseClient";
 import { getCurrentUserId } from "@/lib/auth";
 import Orb from "@/components/Background";
 
-// helpers
 const norm = (s) => (s ? s.trim().toLowerCase() : "");
 const titleCase = (s) => s.replace(/\b\w/g, (m) => m.toUpperCase());
 
@@ -18,8 +17,8 @@ export default function WorksPage() {
   const [genreFilter, setGenreFilter] = useState(null);
   const [kindFilter, setKindFilter] = useState("all");
   const [search, setSearch] = useState("");
-
   const [userId, setUserId] = useState(null);
+
   useEffect(() => {
     getCurrentUserId().then(setUserId);
   }, []);
@@ -28,7 +27,6 @@ export default function WorksPage() {
     async function loadWorks() {
       setLoading(true);
       setErrorMsg("");
-
       const { data, error } = await supabase
         .from("works")
         .select(
@@ -42,7 +40,6 @@ export default function WorksPage() {
       } else {
         setWorks(data ?? []);
       }
-
       setLoading(false);
     }
 
@@ -68,75 +65,65 @@ export default function WorksPage() {
     );
 
   return (
-    <main className="relative min-h-screen flex flex-col items-center px-4 py-8 overflow-hidden text-foreground">
-      {/* Orb en fond */}
-      <div className="fixed inset-0 -z-10 pointer-events-none">
-        <Orb hoverIntensity={0.5} rotateOnHover={true} hue={0} forceHoverState={false} />
-      </div>
+    <main className="relative min-h-screen flex overflow-hidden text-foreground">
+      <aside className="fixed left-0 top-16 h-auto w-64 bg-white/5 backdrop-blur-md border-r border-white/10 p-6 flex flex-col gap-6 z-20 rounded-r-lg group hover:w-72 transition-all duration-300">
+        <h2 className="text-2xl font-bold mb-4 text-white">Filtres</h2>
 
-      <section className="w-full max-w-7xl flex flex-col gap-8">
-        <h1 className="text-4xl font-bold mb-8 gradient-text text-center">Œuvres</h1>
-
-        {/* Filtres */}
-        <div className="flex flex-col gap-4 mb-8 items-center">
-          {/* Genres */}
-          <div className="flex flex-wrap gap-3 justify-center">
-            <button
-              className={`btn-secondary ${!genreFilter ? "bg-white/10 text-white border-white/50" : ""}`}
-              onClick={() => setGenreFilter(null)}
-            >
-              Tous les genres
-            </button>
-            {genres.map((g) => (
-              <button
-                key={g}
-                className={`btn-secondary capitalize ${genreFilter === g ? "bg-white/10 text-white border-white/50" : ""}`}
-                onClick={() => setGenreFilter(genreFilter === g ? null : g)}
-              >
-                {titleCase(g)}
-              </button>
-            ))}
-          </div>
-
-          {/* Types */}
-          <div className="flex flex-wrap gap-3 justify-center">
-            {["all", "film", "serie"].map((type) => (
-              <button
-                key={type}
-                className={`btn-secondary ${kindFilter === type ? "bg-white/10 text-white border-white/50" : ""}`}
-                onClick={() => setKindFilter(type)}
-              >
-                {type === "all" ? "Tous les types" : type === "film" ? "Films" : "Séries"}
-              </button>
-            ))}
-          </div>
-
-          {/* Search */}
-          <form
-            className="flex gap-3 max-w-xl justify-center"
-            onSubmit={(e) => e.preventDefault()}
+        <div className="flex flex-col gap-2 max-h-[70vh] overflow-y-auto">
+          <button
+            className={`btn-secondary ${!genreFilter ? "bg-white/10 text-white border-white/50" : ""}`}
+            onClick={() => setGenreFilter(null)}
           >
-            <input
-              type="text"
-              placeholder="Rechercher un film ou une série..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="input-field"
-            />
-            <button type="submit" className="btn-primary">
-              Chercher
+            Tous les genres
+          </button>
+          {genres.map((g) => (
+            <button
+              key={g}
+              className={`btn-secondary capitalize ${
+                genreFilter === g ? "bg-white/10 text-white border-white/50" : ""
+              }`}
+              onClick={() => setGenreFilter(genreFilter === g ? null : g)}
+            >
+              {titleCase(g)}
             </button>
-          </form>
+          ))}
         </div>
+
+        <div className="flex flex-col gap-2 mt-4">
+          {["all", "film", "serie"].map((type) => (
+            <button
+              key={type}
+              className={`btn-secondary ${
+                kindFilter === type ? "bg-white/10 text-white border-white/50" : ""
+              }`}
+              onClick={() => setKindFilter(type)}
+            >
+              {type === "all" ? "Tous les types" : type === "film" ? "Films" : "Séries"}
+            </button>
+          ))}
+        </div>
+      </aside>
+      <section className="flex-1 flex flex-col items-center px-4 py-8 w-full gap-8 pl-64">
+        <h1 className="text-4xl font-bold mb-8 gradient-text text-center">Œuvres</h1>
+        <form className="flex gap-3 max-w-xl justify-center mb-8" onSubmit={(e) => e.preventDefault()}>
+          <input
+            type="text"
+            placeholder="Rechercher un film ou une série..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="input-field"
+          />
+          <button type="submit" className="btn-primary">
+            Chercher
+          </button>
+        </form>
 
         {loading && <p className="text-foreground/70 text-center">Chargement des œuvres...</p>}
         {errorMsg && <p className="text-red-400 mb-4 text-center">{errorMsg}</p>}
         {!loading && !errorMsg && filteredWorks.length === 0 && (
           <p className="text-foreground/70 text-center">Aucune œuvre trouvée.</p>
         )}
-
-        {/* Grille des œuvres */}
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 w-full">
           {filteredWorks.map((work) => {
             const endingsCount = work.endings?.length ?? 0;
             const posterSrc = work.poster_path?.trim() || "/posters/placeholder.svg";

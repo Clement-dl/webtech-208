@@ -119,7 +119,6 @@ export default function WorkPage() {
       </Link>
 
       <div className="flex flex-col md:flex-row gap-8">
-        {/* Poster + infos */}
         <div className="w-full md:w-1/3 glass p-4 rounded-xl shadow-md flex flex-col">
           <div className="relative w-full aspect-[2/3] rounded-md overflow-hidden">
             <Image src={posterSrc} alt={work.title} fill style={{ objectFit: "cover" }} />
@@ -153,8 +152,6 @@ export default function WorkPage() {
             )}
           </div>
         </div>
-
-        {/* Liste des fins */}
         <section className="flex-1 flex flex-col gap-4">
           <h2 className="text-xl font-semibold mb-4">Fins proposées</h2>
 

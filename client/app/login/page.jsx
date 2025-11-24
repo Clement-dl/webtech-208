@@ -34,8 +34,6 @@ export default function LoginPage() {
 
   return (
     <main className="relative min-h-screen w-full flex flex-col items-center justify-start overflow-hidden">
-      
-      {/* Orb en arrière-plan */}
       <div className="fixed inset-0 -z-10 pointer-events-none">
         <Orb
           hoverIntensity={0.5}
@@ -44,8 +42,6 @@ export default function LoginPage() {
           forceHoverState={false}
         />
       </div>
-
-      {/* Wrapper pour remonter l'encadré */}
       <div className="flex flex-col items-center justify-start flex-1 w-full">
         <section className="glass w-full max-w-md rounded-2xl p-8 shadow-lg animate-fade-in-up -translate-y-32">
           <h1 className="text-2xl font-bold text-center mb-6 gradient-text">
@@ -63,7 +59,6 @@ export default function LoginPage() {
                 className="input-field w-full"
               />
             </div>
-
             <div>
               <label className="block text-sm mb-1">Mot de passe</label>
               <input
@@ -74,11 +69,9 @@ export default function LoginPage() {
                 className="input-field w-full"
               />
             </div>
-
             {errorMsg && (
               <p className="text-sm text-red-400">{errorMsg}</p>
             )}
-
             <button
               type="submit"
               disabled={loading}

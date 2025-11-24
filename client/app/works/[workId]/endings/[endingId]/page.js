@@ -24,11 +24,8 @@ export default async function EndingPage({ params }) {
     console.error(workError || endingError);
     return <p>Fin introuvable.</p>;
   }
-
   return (
     <main className="relative min-h-screen text-[var(--foreground)] px-4 py-6 overflow-auto flex justify-center">
-      
-      {/* Orb en arrière-plan */}
       <div className="fixed inset-0 -z-10 pointer-events-none">
         <Orb
           hoverIntensity={0.5}
@@ -37,8 +34,6 @@ export default async function EndingPage({ params }) {
           forceHoverState={false}
         />
       </div>
-
-      {/* Contenu centré */}
       <section className="glass rounded-2xl p-6 shadow-lg max-w-3xl w-full animate-fade-in-up">
         <h2 className="text-2xl font-bold mb-2 gradient-text">{work.title}</h2>
         <div className="text-sm text-neutral-400 mb-4">
@@ -52,8 +47,6 @@ export default async function EndingPage({ params }) {
         <article className="prose prose-invert max-w-none mb-4">
           <p className="whitespace-pre-line">{ending.content}</p>
         </article>
-
-        {/* Vote */}
         <VoteBox endingId={ending.id} initialVotesCount={ending.votes} />
 
         <div className="mt-6">

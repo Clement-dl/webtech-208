@@ -15,9 +15,7 @@ export default function RootLayout({ children }) {
           <header className="sticky top-0 z-50">
             <Nav />
           </header>
-
-
-        
+      
           <main className="flex-1 container mx-auto px-4 py-10 md:py-8 sm:py-6">
             {children}
           </main>
