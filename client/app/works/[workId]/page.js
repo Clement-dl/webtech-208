@@ -18,7 +18,6 @@ export default function WorkPage() {
   const [errorMsg, setErrorMsg] = useState("");
   const [userId, setUserId] = useState(null);
 
-  // ⭐ Infos OMDb restaurées
   const [omdbInfo, setOmdbInfo] = useState(null);
 
   useEffect(() => {
@@ -49,7 +48,6 @@ export default function WorkPage() {
           created_at: e.created_at,
           votes_count: e.votes?.[0]?.count ?? 0,
         }));
-
         setWork({
           id: data.id,
           slug: data.slug,
@@ -77,7 +75,6 @@ export default function WorkPage() {
     }
     loadUser();
   }, []);
-  
   useEffect(() => {
     async function loadOmdbInfo() {
       if (!work || !work.title) return;
@@ -113,7 +110,6 @@ export default function WorkPage() {
 
     loadOmdbInfo();
   }, [work]);
-
   if (loading) {
     return (
       <main className="relative min-h-screen flex items-center justify-center overflow-hidden px-4">
@@ -171,7 +167,6 @@ export default function WorkPage() {
           {work.description && (
             <p className="text-sm text-neutral-200 mt-4">{work.description}</p>
           )}
-
           {omdbInfo && (
             <div className="mt-4 text-xs text-neutral-300 border-t border-white/10 pt-3">
               <p className="font-semibold text-sm mb-1">Infos officielles (OMDb)</p>
@@ -208,7 +203,6 @@ export default function WorkPage() {
           {endings.length === 0 && (
             <p className="text-sm text-neutral-400">Aucune fin n’a encore été proposée.</p>
           )}
-
           {endings.map((ending) => (
             <article
               key={ending.id}

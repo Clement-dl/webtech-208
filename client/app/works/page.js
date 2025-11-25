@@ -69,21 +69,17 @@ export default function WorksPage() {
 
   return (
     <main className="relative min-h-screen flex overflow-hidden text-foreground">
-      {/* --- FOND ORB --- */}
       <div className="fixed inset-0 -z-10 pointer-events-none">
         <Orb hoverIntensity={0.5} rotateOnHover={true} hue={0} forceHoverState={false} />
       </div>
 
       <aside className="fixed left-0 top-1/3 z-20 flex flex-col items-start">
-        {/* BOUTON BURGER */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
           className="p-2 bg-[rgba(17,24,39,0.7)] backdrop-blur-xl border border-[rgba(139,92,246,0.15)] rounded-r-xl text-white hover:bg-[rgba(139,92,246,0.1)] transition-all duration-300 z-30 shadow-md"
         >
           <Menu size={22} />
         </button>
-
-        {/* MENU DEROULANT */}
         <div
           className={`
             bg-[rgba(17,24,39,0.7)] backdrop-blur-xl border border-[rgba(139,92,246,0.15)] rounded-r-xl
@@ -143,8 +139,6 @@ export default function WorksPage() {
 
       <section className="flex-1 flex flex-col items-center px-4 py-8 w-full gap-8 pl-20">
         <h1 className="text-4xl font-bold mb-8 gradient-text text-center">Œuvres</h1>
-
-        {/* --- BARRE DE RECHERCHE MODERNE --- */}
         <form
           className="flex max-w-xl w-full mb-8 relative"
           onSubmit={(e) => e.preventDefault()}

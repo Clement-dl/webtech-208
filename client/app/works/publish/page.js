@@ -73,7 +73,6 @@ export default function PublishWorkPage() {
 
   return (
     <main className="relative min-h-screen flex items-start justify-center overflow-hidden px-4 py-8">
-      {/* Orb en fond */}
       <div className="fixed inset-0 -z-10 pointer-events-none">
         <Orb hoverIntensity={0.5} rotateOnHover={true} hue={0} forceHoverState={false} />
       </div>
@@ -149,7 +148,7 @@ export default function PublishWorkPage() {
               required
             />
             <p className="text-xs text-foreground/60 mt-1">
-              L&apos;image sera uploadée dans le bucket <code>posters</code>.
+              L'image sera uploadée dans le bucket <code>posters</code>.
             </p>
           </div>
 
