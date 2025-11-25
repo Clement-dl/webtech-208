@@ -8,7 +8,7 @@
 - Luc Bernard Fernand BANAG LIBITE
 
 ##  URL de déploiement :
-https://webtech-208.vercel.app/
+webtech-208-git-main-clement-dls-projects.vercel.app
 
 ---
 
