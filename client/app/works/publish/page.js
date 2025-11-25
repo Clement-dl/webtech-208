@@ -148,7 +148,7 @@ export default function PublishWorkPage() {
               required
             />
             <p className="text-xs text-foreground/60 mt-1">
-              L'image sera uploadée dans le bucket <code>posters</code>.
+              L image sera uploadée dans le bucket <code>posters</code>.
             </p>
           </div>
 

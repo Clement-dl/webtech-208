@@ -54,7 +54,7 @@ export default async function EndingPage({ params }) {
             href={`/works/${workId}`}
             className="text-sm text-[var(--accent)] hover:text-[var(--accent-hover)] underline transition-colors"
           >
-            ← Retour à l’œuvre
+            Retour à l œuvre
           </Link>
         </div>
       </section>
