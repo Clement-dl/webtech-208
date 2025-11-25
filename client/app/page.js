@@ -7,15 +7,19 @@ import Carrousel from "@/components/Carousel";
 import Orb from "@/components/Background";
 
 export default function HomePage() {
+
+  // stocker l'ID utilisateur s'il est connecté
   const [userId, setUserId] = useState(null);
 
+  // on vérifie si l'utilisateur est connecté
   useEffect(() => {
     getCurrentUserId().then(setUserId);
   }, []);
 
   return (
     <main className="relative min-h-screen w-full flex flex-col items-center pt-16 overflow-hidden">
-      
+
+      {/* fond anime */}
       <div className="fixed inset-0 -z-10 pointer-events-none">
         <Orb
           hoverIntensity={0.5}
@@ -31,11 +35,14 @@ export default function HomePage() {
         <p className="text-md md:text-sm sm:text-sm text-neutral-300 mb-6">
           Réécris la fin. Vote pour la meilleure. Choisis une œuvre culte, propose ta fin alternative et découvre celles des autres.
         </p>
+
         <div className="flex gap-4 flex-wrap justify-center mb-4">
           <Link href="/works" className="btn-primary">Voir les œuvres</Link>
+          {/* Si l'utilisateur est connecté bouton actif */}
           {userId ? (
             <Link href="/works" className="btn-secondary">Proposer une fin</Link>
           ) : (
+            // Sinon bouton désactivé
             <button
               type="button"
               disabled
@@ -49,6 +56,7 @@ export default function HomePage() {
           Merci de marquer clairement vos spoilers et de rester respectueux.
         </p>
       </section>
+      {/* Carrousel d'œuvres */}
       <Carrousel />
     </main>
   );

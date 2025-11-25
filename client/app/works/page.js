@@ -6,7 +6,6 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
 import { getCurrentUserId } from "@/lib/auth";
 import Orb from "@/components/Background";
-import { Menu } from "lucide-react";
 
 const norm = (s) => (s ? s.trim().toLowerCase() : "");
 const titleCase = (s) => s.replace(/\b\w/g, (m) => m.toUpperCase());
@@ -20,8 +19,6 @@ export default function WorksPage() {
   const [search, setSearch] = useState("");
   const [userId, setUserId] = useState(null);
 
-  const [menuOpen, setMenuOpen] = useState(false);
-
   useEffect(() => {
     getCurrentUserId().then(setUserId);
   }, []);
@@ -30,6 +27,7 @@ export default function WorksPage() {
     async function loadWorks() {
       setLoading(true);
       setErrorMsg("");
+
       const { data, error } = await supabase
         .from("works")
         .select(
@@ -73,82 +71,12 @@ export default function WorksPage() {
         <Orb hoverIntensity={0.5} rotateOnHover={true} hue={0} forceHoverState={false} />
       </div>
 
-      <aside className="fixed left-0 top-1/3 z-20 flex flex-col items-start">
-        <button
-          onClick={() => setMenuOpen(!menuOpen)}
-          className="p-2 bg-[rgba(17,24,39,0.7)] backdrop-blur-xl border border-[rgba(139,92,246,0.15)] rounded-r-xl text-white hover:bg-[rgba(139,92,246,0.1)] transition-all duration-300 z-30 shadow-md"
-        >
-          <Menu size={22} />
-        </button>
-        <div
-          className={`
-            bg-[rgba(17,24,39,0.7)] backdrop-blur-xl border border-[rgba(139,92,246,0.15)] rounded-r-xl
-            overflow-hidden transition-all duration-300 mt-2 shadow-lg
-            ${menuOpen ? "w-72 p-6 opacity-100" : "w-0 p-0 opacity-0"}
-          `}
-        >
-          {menuOpen && (
-            <div className="flex flex-col gap-3 items-center">
-              <div className="flex flex-col gap-2 max-h-[60vh] overflow-y-auto pr-1 items-center">
-                <button
-                  className={`flex items-center gap-2 px-2 py-1 text-xs font-medium rounded-lg text-white w-[150px] justify-center transition-all duration-300 bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 hover:from-purple-600 hover:to-purple-800 shadow-md ${
-                    !genreFilter ? "ring-2 ring-purple-400 scale-105" : ""
-                  }`}
-                  onClick={() => setGenreFilter(null)}
-                >
-                  <Image src="/sort.png" width={18} height={18} alt="all" className="filter invert" />
-                  Tous les genres
-                </button>
+      <section className="flex-1 flex flex-col items-center px-4 py-8 w-full gap-8">
+        <h1 className="text-4xl font-bold mb-4 gradient-text text-center">Œuvres</h1>
 
-                {genres.map((g) => {
-                  let genreIcon = "/Drame.png";
-                  if (g === "drame") genreIcon = "/Drame.png";
-                  else if (g === "space opera") genreIcon = "/Space Opera.png";
-                  else if (g === "science-fiction") genreIcon = "/Science-Fiction.png";
-                  else if (g === "thriller") genreIcon = "/Thriller.png";
-
-                  return (
-                    <button
-                      key={g}
-                      className={`flex items-center gap-2 px-2 py-1 text-xs font-medium rounded-lg text-white w-[150px] justify-center transition-all duration-300 bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 hover:from-purple-600 hover:to-purple-800 shadow-md ${
-                        genreFilter === g ? "ring-2 ring-purple-400 scale-105" : ""
-                      }`}
-                      onClick={() => setGenreFilter(genreFilter === g ? null : g)}
-                    >
-                      <Image src={genreIcon} width={18} height={18} alt={g} className="filter invert" />
-                      {titleCase(g)}
-                    </button>
-                  );
-                })}
-              </div>
-
-              <div className="flex flex-col gap-2 mt-2 items-center">
-                {["all", "film", "serie"].map((type) => {
-                  const label = type === "all" ? "Tous les types" : type === "film" ? "Films" : "Séries";
-                  const icon = type === "all" ? "/shapes.png" : type === "film" ? "/video.png" : "/episodes.png";
-                  return (
-                    <button
-                      key={type}
-                      className={`flex items-center gap-2 px-2 py-1 text-xs font-medium rounded-lg text-white w-[150px] justify-center transition-all duration-300 bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 hover:from-purple-600 hover:to-purple-800 shadow-md ${
-                        kindFilter === type ? "ring-2 ring-purple-400 scale-105" : ""
-                      }`}
-                      onClick={() => setKindFilter(type)}
-                    >
-                      <Image src={icon} width={18} height={18} alt={type} className="filter invert" />
-                      {label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
-      </aside>
-
-      <section className="flex-1 flex flex-col items-center px-4 py-8 w-full gap-8 pl-20">
-        <h1 className="text-4xl font-bold mb-8 gradient-text text-center">Œuvres</h1>
+        {/* Barre de recherche */}
         <form
-          className="flex max-w-xl w-full mb-8 relative"
+          className="flex max-w-xl w-full mb-4 relative"
           onSubmit={(e) => e.preventDefault()}
         >
           <input
@@ -159,7 +87,7 @@ export default function WorksPage() {
             className="
               w-full px-5 py-3 rounded-full bg-gray-800/60 placeholder-gray-400 text-white
               shadow-md focus:outline-none focus:ring-2 focus:ring-purple-500
-              focus:shadow-lg transition-all duration-300 ease-in-out
+              transition-all duration-300 ease-in-out
             "
           />
           <button
@@ -176,17 +104,75 @@ export default function WorksPage() {
           </button>
         </form>
 
+        {/* Filtres */}
+        <div className="flex flex-col items-center justify-center gap-4 w-full">
+
+          {/* Genres */}
+          <div className="flex flex-wrap justify-center gap-3">
+            <button
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-white bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 hover:from-purple-600 hover:to-purple-800 shadow-md transition-all duration-300 ${
+                !genreFilter ? "ring-2 ring-purple-400 scale-105" : ""
+              }`}
+              onClick={() => setGenreFilter(null)}
+            >
+              <Image src="/sort.png" width={18} height={18} alt="all" className="filter invert" />
+              Tous les genres
+            </button>
+
+            {genres.map((g) => {
+              let genreIcon = "/Drame.png";
+              if (g === "drame") genreIcon = "/Drame.png";
+              else if (g === "space opera") genreIcon = "/Space Opera.png";
+              else if (g === "science-fiction") genreIcon = "/Science-Fiction.png";
+              else if (g === "thriller") genreIcon = "/Thriller.png";
+
+              return (
+                <button
+                  key={g}
+                  className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-white bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 hover:from-purple-600 hover:to-purple-800 shadow-md transition-all duration-300 ${
+                    genreFilter === g ? "ring-2 ring-purple-400 scale-105" : ""
+                  }`}
+                  onClick={() => setGenreFilter(genreFilter === g ? null : g)}
+                >
+                  <Image src={genreIcon} width={18} height={18} alt={g} className="filter invert" />
+                  {titleCase(g)}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Types */}
+          <div className="flex flex-wrap justify-center gap-3 mt-2">
+            {["all", "film", "serie"].map((type) => {
+              const label = type === "all" ? "Tous les types" : type === "film" ? "Films" : "Séries";
+              const icon = type === "all" ? "/shapes.png" : type === "film" ? "/video.png" : "/episodes.png";
+
+              return (
+                <button
+                  key={type}
+                  className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg text-white bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 hover:from-purple-600 hover:to-purple-800 shadow-md transition-all duration-300 ${
+                    kindFilter === type ? "ring-2 ring-purple-400 scale-105" : ""
+                  }`}
+                  onClick={() => setKindFilter(type)}
+                >
+                  <Image src={icon} width={18} height={18} alt={type} className="filter invert" />
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Liste des œuvres */}
         {loading && <p className="text-foreground/70 text-center">Chargement des œuvres...</p>}
         {errorMsg && <p className="text-red-400 mb-4 text-center">{errorMsg}</p>}
         {!loading && !errorMsg && filteredWorks.length === 0 && (
           <p className="text-foreground/70 text-center">Aucune œuvre trouvée.</p>
         )}
-
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 w-full">
           {filteredWorks.map((work) => {
             const endingsCount = work.endings?.length ?? 0;
             const posterSrc = work.poster_path?.trim() || "/posters/placeholder.svg";
-
             return (
               <article
                 key={work.id}
@@ -208,24 +194,18 @@ export default function WorksPage() {
                   </p>
                   <p className="text-sm text-foreground/60">{endingsCount} fin(s) proposée(s)</p>
                   <div className="mt-auto flex gap-3 pt-4">
-                    <Link
-                      href={`/works/${work.slug}`}
-                      className="btn-primary flex-1 text-center"
-                    >
+                    <Link href={`/works/${work.slug}`} className="btn-primary flex-1 text-center">
                       Voir les fins
                     </Link>
                     {userId ? (
-                      <Link
-                        href={`/works/${work.slug}/submit`}
-                        className="btn-secondary flex-1 text-center"
-                      >
+                      <Link href={`/works/${work.slug}/submit`} className="btn-secondary flex-1 text-center">
                         Proposer une fin
                       </Link>
                     ) : (
                       <button
                         type="button"
                         disabled
-                        className="btn-secondary flex-1 text-center bg-gray-800 border-gray-700 text-neutral-400 cursor-not-allowed disabled:opacity-60"
+                        className="btn-secondary flex-1 bg-gray-800 border-gray-700 text-neutral-400 cursor-not-allowed"
                       >
                         Proposer une fin
                       </button>

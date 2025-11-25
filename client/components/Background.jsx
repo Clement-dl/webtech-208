@@ -1,3 +1,5 @@
+// animation fortement inspiré de react bit
+
 import { useEffect, useRef } from 'react';
 import { Renderer, Program, Mesh, Triangle, Vec3 } from 'ogl';
 

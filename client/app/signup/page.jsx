@@ -1,3 +1,4 @@
+// Page très similaire a login
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -14,7 +15,6 @@ export default function SignupPage() {
   const [role, setRole] = useState("user");
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
-
   const handleSignup = async (e) => {
     e.preventDefault();
     setErrorMsg("");
