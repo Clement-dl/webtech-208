@@ -84,14 +84,14 @@ export default function WorksPage() {
           className={`
             bg-[rgba(17,24,39,0.7)] backdrop-blur-xl border border-[rgba(139,92,246,0.15)] rounded-r-xl
             overflow-hidden transition-all duration-300 mt-2 shadow-lg
-            ${menuOpen ? "w-44 p-4 opacity-100" : "w-0 p-0 opacity-0"}
+            ${menuOpen ? "w-72 p-6 opacity-100" : "w-0 p-0 opacity-0"}
           `}
         >
           {menuOpen && (
-            <div className="flex flex-col gap-3">
-              <div className="flex flex-col gap-2 max-h-[60vh] overflow-y-auto pr-1">
+            <div className="flex flex-col gap-3 items-center">
+              <div className="flex flex-col gap-2 max-h-[60vh] overflow-y-auto pr-1 items-center">
                 <button
-                  className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl text-white transition-all duration-300 bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 hover:from-purple-600 hover:to-purple-800 shadow-md ${
+                  className={`flex items-center gap-2 px-2 py-1 text-xs font-medium rounded-lg text-white w-[150px] justify-center transition-all duration-300 bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 hover:from-purple-600 hover:to-purple-800 shadow-md ${
                     !genreFilter ? "ring-2 ring-purple-400 scale-105" : ""
                   }`}
                   onClick={() => setGenreFilter(null)}
@@ -100,28 +100,36 @@ export default function WorksPage() {
                   Tous les genres
                 </button>
 
-                {genres.map((g) => (
-                  <button
-                    key={g}
-                    className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl text-white transition-all duration-300 bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 hover:from-purple-600 hover:to-purple-800 shadow-md ${
-                      genreFilter === g ? "ring-2 ring-purple-400 scale-105" : ""
-                    }`}
-                    onClick={() => setGenreFilter(genreFilter === g ? null : g)}
-                  >
-                    <Image src={`/${g}.png`} width={18} height={18} alt={g} className="filter invert" />
-                    {titleCase(g)}
-                  </button>
-                ))}
+                {genres.map((g) => {
+                  let genreIcon = "/Drame.png";
+                  if (g === "drame") genreIcon = "/Drame.png";
+                  else if (g === "space opera") genreIcon = "/Space Opera.png";
+                  else if (g === "science-fiction") genreIcon = "/Science-Fiction.png";
+                  else if (g === "thriller") genreIcon = "/Thriller.png";
+
+                  return (
+                    <button
+                      key={g}
+                      className={`flex items-center gap-2 px-2 py-1 text-xs font-medium rounded-lg text-white w-[150px] justify-center transition-all duration-300 bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 hover:from-purple-600 hover:to-purple-800 shadow-md ${
+                        genreFilter === g ? "ring-2 ring-purple-400 scale-105" : ""
+                      }`}
+                      onClick={() => setGenreFilter(genreFilter === g ? null : g)}
+                    >
+                      <Image src={genreIcon} width={18} height={18} alt={g} className="filter invert" />
+                      {titleCase(g)}
+                    </button>
+                  );
+                })}
               </div>
 
-              <div className="flex flex-col gap-2 mt-2">
+              <div className="flex flex-col gap-2 mt-2 items-center">
                 {["all", "film", "serie"].map((type) => {
                   const label = type === "all" ? "Tous les types" : type === "film" ? "Films" : "Séries";
                   const icon = type === "all" ? "/shapes.png" : type === "film" ? "/video.png" : "/episodes.png";
                   return (
                     <button
                       key={type}
-                      className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl text-white transition-all duration-300 bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 hover:from-purple-600 hover:to-purple-800 shadow-md ${
+                      className={`flex items-center gap-2 px-2 py-1 text-xs font-medium rounded-lg text-white w-[150px] justify-center transition-all duration-300 bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 hover:from-purple-600 hover:to-purple-800 shadow-md ${
                         kindFilter === type ? "ring-2 ring-purple-400 scale-105" : ""
                       }`}
                       onClick={() => setKindFilter(type)}
@@ -193,14 +201,12 @@ export default function WorksPage() {
                     sizes="(max-width: 768px) 100vw, 33vw"
                   />
                 </div>
-
                 <div className="mt-4 flex flex-col gap-2 flex-1">
                   <h2 className="text-lg font-semibold">{work.title}</h2>
                   <p className="text-sm text-foreground/60">
                     {work.year ?? "—"} · {work.kind === "film" ? "movie" : "serie"} · {work.genre ?? "—"}
                   </p>
                   <p className="text-sm text-foreground/60">{endingsCount} fin(s) proposée(s)</p>
-
                   <div className="mt-auto flex gap-3 pt-4">
                     <Link
                       href={`/works/${work.slug}`}
@@ -208,7 +214,6 @@ export default function WorksPage() {
                     >
                       Voir les fins
                     </Link>
-
                     {userId ? (
                       <Link
                         href={`/works/${work.slug}/submit`}

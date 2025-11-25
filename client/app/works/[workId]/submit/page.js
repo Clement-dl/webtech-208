@@ -85,9 +85,7 @@ export default function SubmitEndingPage() {
       }
     } catch (err) {
       console.error(err);
-      setErrorMsg(
-        "Une erreur inattendue est survenue lors de l'enregistrement."
-      );
+      setErrorMsg("Une erreur inattendue est survenue lors de l'enregistrement.");
     } finally {
       setSubmitting(false);
     }
@@ -112,22 +110,22 @@ export default function SubmitEndingPage() {
         </div>
         <p className="mb-4 text-[var(--foreground)]">{loadError || "Œuvre introuvable."}</p>
         <Link href="/works" className="btn-secondary">
-          Retour aux œuvres
+          ← Retour aux œuvres
         </Link>
       </main>
     );
   }
 
   return (
-    <main className="relative min-h-screen flex justify-center overflow-hidden px-4 py-6">
+    <main className="relative min-h-screen flex justify-center items-start overflow-hidden px-4 py-6">
       <div className="fixed inset-0 -z-10 pointer-events-none">
         <Orb hoverIntensity={0.5} rotateOnHover={true} hue={0} forceHoverState={false} />
       </div>
 
-      <section className="glass w-full max-w-3xl p-6 rounded-2xl shadow-lg animate-fade-in-up">
+      <section className="glass w-full max-w-2xl p-6 rounded-xl shadow-lg animate-fade-in-up">
         <Link
           href={`/works/${work.slug}`}
-          className="text-sm text-[var(--accent)] hover:text-[var(--accent-hover)] underline transition-colors mb-4 block"
+          className="btn-secondary mb-4 inline-block"
         >
           ← Retour aux fins
         </Link>
@@ -163,7 +161,7 @@ export default function SubmitEndingPage() {
             </label>
             <textarea
               required
-              rows={8}
+              rows={6}
               value={content}
               onChange={(e) => setContent(e.target.value)}
               className="input-field w-full"

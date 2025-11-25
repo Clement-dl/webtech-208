@@ -11,13 +11,11 @@ import Orb from "@/components/Background";
 
 export default function WorkPage() {
   const { workId } = useParams();
-
   const [work, setWork] = useState(null);
   const [endings, setEndings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
   const [userId, setUserId] = useState(null);
-
   const [omdbInfo, setOmdbInfo] = useState(null);
 
   useEffect(() => {
@@ -48,6 +46,7 @@ export default function WorkPage() {
           created_at: e.created_at,
           votes_count: e.votes?.[0]?.count ?? 0,
         }));
+
         setWork({
           id: data.id,
           slug: data.slug,
@@ -75,29 +74,23 @@ export default function WorkPage() {
     }
     loadUser();
   }, []);
+
   useEffect(() => {
     async function loadOmdbInfo() {
       if (!work || !work.title) return;
-
       const apiKey = process.env.NEXT_PUBLIC_OMDB_API_KEY;
       if (!apiKey) return;
 
       try {
         const res = await fetch(
-          `https://www.omdbapi.com/?t=${encodeURIComponent(
-            work.title
-          )}&apikey=${apiKey}`
+          `https://www.omdbapi.com/?t=${encodeURIComponent(work.title)}&apikey=${apiKey}`
         );
         const data = await res.json();
-
         if (data && data.Response === "True") {
           setOmdbInfo({
             year: data.Year,
             runtime: data.Runtime,
-            imdbRating:
-              data.imdbRating && data.imdbRating !== "N/A"
-                ? data.imdbRating
-                : null,
+            imdbRating: data.imdbRating && data.imdbRating !== "N/A" ? data.imdbRating : null,
           });
         } else {
           setOmdbInfo(null);
@@ -110,6 +103,7 @@ export default function WorkPage() {
 
     loadOmdbInfo();
   }, [work]);
+
   if (loading) {
     return (
       <main className="relative min-h-screen flex items-center justify-center overflow-hidden px-4">
@@ -129,16 +123,13 @@ export default function WorkPage() {
         </div>
         <p className="mb-4 text-[var(--foreground)]">{errorMsg || "Œuvre introuvable."}</p>
         <Link href="/works" className="btn-secondary">
-          Retour aux œuvres
+          ← Retour aux œuvres
         </Link>
       </main>
     );
   }
 
-  const posterSrc =
-    work.poster_path && work.poster_path.trim() !== ""
-      ? work.poster_path
-      : "/posters/placeholder.svg";
+  const posterSrc = work.poster_path?.trim() || "/posters/placeholder.svg";
 
   return (
     <main className="relative min-h-screen px-4 py-6 overflow-hidden">
@@ -146,16 +137,13 @@ export default function WorkPage() {
         <Orb hoverIntensity={0.5} rotateOnHover={true} hue={0} forceHoverState={false} />
       </div>
 
-      <Link
-        href="/works"
-        className="text-sm text-[var(--accent)] hover:text-[var(--accent-hover)] underline mb-4 inline-block"
-      >
-        ← Retour aux œuvres
+      <Link href="/works" className="btn-secondary mb-4 inline-block">
+        Retour aux œuvres
       </Link>
 
       <div className="flex flex-col md:flex-row gap-8">
         <div className="w-full md:w-1/3 glass p-4 rounded-xl shadow-md flex flex-col">
-          <div className="relative w-full aspect-[2/3] rounded-md overflow-hidden">
+          <div className="relative w-full aspect-[2/3] rounded-xl overflow-hidden">
             <Image src={posterSrc} alt={work.title} fill style={{ objectFit: "cover" }} />
           </div>
 
@@ -203,6 +191,7 @@ export default function WorkPage() {
           {endings.length === 0 && (
             <p className="text-sm text-neutral-400">Aucune fin n’a encore été proposée.</p>
           )}
+
           {endings.map((ending) => (
             <article
               key={ending.id}
