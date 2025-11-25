@@ -18,6 +18,9 @@ export default function WorkPage() {
   const [errorMsg, setErrorMsg] = useState("");
   const [userId, setUserId] = useState(null);
 
+  // ⭐ Infos OMDb restaurées
+  const [omdbInfo, setOmdbInfo] = useState(null);
+
   useEffect(() => {
     async function loadWork() {
       setLoading(true);
@@ -74,6 +77,42 @@ export default function WorkPage() {
     }
     loadUser();
   }, []);
+  
+  useEffect(() => {
+    async function loadOmdbInfo() {
+      if (!work || !work.title) return;
+
+      const apiKey = process.env.NEXT_PUBLIC_OMDB_API_KEY;
+      if (!apiKey) return;
+
+      try {
+        const res = await fetch(
+          `https://www.omdbapi.com/?t=${encodeURIComponent(
+            work.title
+          )}&apikey=${apiKey}`
+        );
+        const data = await res.json();
+
+        if (data && data.Response === "True") {
+          setOmdbInfo({
+            year: data.Year,
+            runtime: data.Runtime,
+            imdbRating:
+              data.imdbRating && data.imdbRating !== "N/A"
+                ? data.imdbRating
+                : null,
+          });
+        } else {
+          setOmdbInfo(null);
+        }
+      } catch (err) {
+        console.error("Erreur OMDb:", err);
+        setOmdbInfo(null);
+      }
+    }
+
+    loadOmdbInfo();
+  }, [work]);
 
   if (loading) {
     return (
@@ -133,6 +172,16 @@ export default function WorkPage() {
             <p className="text-sm text-neutral-200 mt-4">{work.description}</p>
           )}
 
+          {omdbInfo && (
+            <div className="mt-4 text-xs text-neutral-300 border-t border-white/10 pt-3">
+              <p className="font-semibold text-sm mb-1">Infos officielles (OMDb)</p>
+              <p>
+                Durée : {omdbInfo.runtime || "N/A"}
+                {omdbInfo.imdbRating && <> • Note IMDb : {omdbInfo.imdbRating}/10</>}
+              </p>
+            </div>
+          )}
+
           <div className="mt-6 w-full flex justify-center md:justify-start">
             {userId ? (
               <Link
@@ -152,6 +201,7 @@ export default function WorkPage() {
             )}
           </div>
         </div>
+
         <section className="flex-1 flex flex-col gap-4">
           <h2 className="text-xl font-semibold mb-4">Fins proposées</h2>
 
@@ -166,7 +216,8 @@ export default function WorkPage() {
             >
               <h3 className="font-semibold text-lg mb-1">{ending.title || "Fin sans titre"}</h3>
               <p className="text-sm text-neutral-400 mb-2">
-                Proposée par <span className="font-medium">{ending.author_name || "Anonyme"}</span> — {ending.votes_count} vote{ending.votes_count !== 1 ? "s" : ""}
+                Proposée par <span className="font-medium">{ending.author_name || "Anonyme"}</span>{" "}
+                — {ending.votes_count} vote{ending.votes_count !== 1 ? "s" : ""}
               </p>
               <p className="text-sm whitespace-pre-wrap mb-3">{ending.content}</p>
               <VoteBox endingId={ending.id} votesCount={ending.votes_count} />
