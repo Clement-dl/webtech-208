@@ -120,8 +120,9 @@ export default function WorksPage() {
             </button>
 
             {genres.map((g) => {
-              let genreIcon = "/Drame.png";
+              let genreIcon = "";
               if (g === "drame") genreIcon = "/Drame.png";
+              else if (g === "fantasy") genreIcon = "/Fantasy.png";
               else if (g === "space opera") genreIcon = "/Space Opera.png";
               else if (g === "science-fiction") genreIcon = "/Science-Fiction.png";
               else if (g === "thriller") genreIcon = "/Thriller.png";
